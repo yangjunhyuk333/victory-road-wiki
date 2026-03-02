@@ -74,14 +74,14 @@ export default function Home() {
                         {newsList.map((news) => (
                             <div key={news.id} style={{
                                 padding: '1.25rem 1rem',
-                                background: '#F8FAFC',
+                                background: 'var(--bg-color)',
                                 borderRadius: '12px',
-                                border: '1px solid #F1F5F9',
+                                border: '1px solid var(--border-color)',
                                 transition: 'all 0.2s',
                                 cursor: 'pointer'
                             }}
-                                onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = '#FFFFFF'; }}
-                                onMouseOut={e => { e.currentTarget.style.borderColor = '#F1F5F9'; e.currentTarget.style.background = '#F8FAFC'; }}
+                                onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--text-muted)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
+                                onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-color)'; }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '20px', background: news.tag === 'OFFICIAL' ? '#DBEAFE' : '#FEF3C7', color: news.tag === 'OFFICIAL' ? '#1D4ED8' : '#B45309' }}>
@@ -115,7 +115,7 @@ export default function Home() {
                                 transition: 'background 0.2s',
                                 cursor: 'pointer'
                             }}
-                                onMouseOver={e => e.currentTarget.style.background = '#F1F5F9'}
+                                onMouseOver={e => e.currentTarget.style.background = 'var(--bg-color)'}
                                 onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                             >
                                 <img src={char.img} alt={char.name} style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
@@ -152,13 +152,13 @@ export default function Home() {
 
                     <div className="grid-container">
                         <div style={{
-                            background: '#FFFFFF',
+                            background: 'var(--bg-surface)',
                             padding: '1.5rem',
                             borderRadius: '16px',
-                            border: '1px solid #E2E8F0',
+                            border: '1px solid var(--border-color)',
                             position: 'relative',
                             overflow: 'hidden',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                            boxShadow: 'var(--soft-shadow)'
                         }}>
                             <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.05 }}><Star size={80} fill="#DB2777" /></div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -170,10 +170,10 @@ export default function Home() {
                         </div>
 
                         <div style={{
-                            background: '#F8FAFC',
+                            background: 'var(--bg-color)',
                             padding: '1.5rem',
                             borderRadius: '16px',
-                            border: '1px solid #E2E8F0',
+                            border: '1px solid var(--border-color)',
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                                 <span style={{ background: '#3B82F6', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>SYSTEM</span>

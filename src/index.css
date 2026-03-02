@@ -361,7 +361,7 @@ a:hover {
   padding: 4vw 1rem;
   border-radius: 24px;
   position: relative;
-  background: #fff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   box-shadow: var(--soft-shadow);
   overflow: hidden;
