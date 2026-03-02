@@ -1,30 +1,70 @@
-// React Router를 사용해 여러 페이지를 이동할 수 있게 합니다
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './config/firebase';
 import Home from './pages/Home';
 import Login from './pages/Login';
 
-// 상단 네비게이션 바 컴포넌트
-function Navbar() {
+// 인증된 사용자만 접근을 허용하는 보호 라우트 컴포넌트
+function PrivateRoute({ children, user, loading }) {
+  const location = useLocation();
+
+  if (loading) return <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>로딩 중...</div>;
+  if (!user) {
+    // 로그인되지 않은 경우 로그인 페이지로 보내며 현재 경로를 기억합니다
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
+
+function Navbar({ user }) {
+  const handleLogout = () => {
+    signOut(auth);
+  };
+
   return (
     <nav className="navbar">
-      <Link to="/" className="logo">VICTORY ROAD WIKI</Link>
+      <Link to="/" className="logo">V-ROAD WIKI</Link>
       <div className="nav-links">
-        <Link to="/login" className="btn btn-secondary">로그인</Link>
+        {user ? (
+          <button onClick={handleLogout} className="btn btn-secondary">로그아웃</button>
+        ) : (
+          <Link to="/login" className="btn btn-secondary">로그인</Link>
+        )}
       </div>
     </nav>
   );
 }
 
-// 메인 앱 컴포넌트 (초보자 참고: 라우터 구조가 정의되어 경로에 따라 다른 UI를 보여줍니다)
 function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 컴포넌트 마운트 시 Firebase 인증 상태 수신
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <BrowserRouter basename="/victory-road-wiki">
+      {/* 네비게이션 바에 사용자 정보를 전달하여 버튼 동적 변경 */}
+      <Navbar user={user} />
       <Routes>
-        {/* '/' 경로로 가면 Home 화면을 렌더링합니다 */}
-        <Route path="/" element={<Home />} />
-        {/* '/login' 경로로 가면 Login 화면을 렌더링합니다 */}
-        <Route path="/login" element={<Login />} />
+        {/* / 라우트는 로그인 필수 */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute user={user} loading={loading}>
+              <Home />
+            </PrivateRoute>
+          }
+        />
+        {/* 로그인 페이지 라우트 */}
+        <Route path="/login" element={<Login user={user} />} />
       </Routes>
     </BrowserRouter>
   );

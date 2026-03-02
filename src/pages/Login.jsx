@@ -1,93 +1,148 @@
-// 리액트의 상태 관리 훅(useState)을 가져옵니다.
-import { useState } from 'react';
-// 파이어베이스 인증 함수들을 가져옵니다.
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    updateProfile
+} from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 
-export default function Login() {
-    // 이메일과 비밀번호 입력값을 저장할 상태 (초보자 참고: 값이 변할 때마다 화면을 즉시 업데이트합니다)
+export default function Login({ user }) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isSignup, setIsSignup] = useState(false); // 로그인 폼 <-> 회원가입 폼 전환 상태
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [displayName, setDisplayName] = useState(''); // 닉네임 추가
     const [errorMsg, setErrorMsg] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // 이메일/비밀번호 로그인 버튼 클릭 시 실행할 함수
-    const handleEmailLogin = async (e) => {
-        e.preventDefault(); // 폼 제출 시 페이지가 새로고침되는 현상을 막습니다
+    // 이미 로그인한 사용자가 접근하면 홈으로 튕겨냅니다
+    useEffect(() => {
+        if (user) {
+            const from = location.state?.from?.pathname || "/";
+            navigate(from, { replace: true });
+        }
+    }, [user, navigate, location]);
+
+    const handleAuthAction = async (e) => {
+        e.preventDefault();
         setErrorMsg('');
+        setIsLoading(true);
+
         try {
-            // 파이어베이스 이메일 로그인 함수 호출
-            await signInWithEmailAndPassword(auth, email, password);
-            alert('로그인 성공!');
+            if (isSignup) {
+                // 회원가입 로직
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: displayName });
+                // updateProfile은 onAuthStateChanged가 즉각 인지하지 못할 수 있으므로 강제 리로드 필요시 고려가능
+            } else {
+                // 이메일 로그인 로직
+                await signInWithEmailAndPassword(auth, email, password);
+            }
+            // 성공하면 useEffect의 네비게이션 트리거가 동작함
         } catch (error) {
-            // 에러 발생 시 사용자에게 보여줄 메시지를 설정합니다
-            setErrorMsg('로그인 실패: 이메일이나 비밀번호를 확인해주세요.');
             console.error(error);
+            if (error.code === 'auth/email-already-in-use') setErrorMsg('이미 가입된 이메일입니다.');
+            else if (error.code === 'auth/weak-password') setErrorMsg('비밀번호는 최소 6자리 이상이어야 합니다.');
+            else if (error.code === 'auth/invalid-credential') setErrorMsg('이메일 또는 비밀번호가 잘못되었습니다.');
+            else setErrorMsg('인증 과정 중 문제가 발생했습니다: ' + error.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // 구글 소셜 로그인 버튼 클릭 시 실행할 함수
     const handleGoogleLogin = async () => {
         try {
-            // 팝업창을 통한 구글 로그인 실행
             await signInWithPopup(auth, googleProvider);
-            alert('구글 로그인 성공!');
         } catch (error) {
-            setErrorMsg('구글 로그인 중 문제가 발생했습니다.');
             console.error(error);
+            setErrorMsg('구글 로그인 중 문제가 발생했습니다.');
         }
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-            <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--primary-color)' }}>WIKI LOGIN</h2>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', padding: '1rem' }}>
+            {/* 폼을 감싸는 전체 Auth 카드 (글래스모피즘 + 사이버네온 컨셉) */}
+            <div className="auth-card">
+                {/* 로그인/가입 토글 탭 버튼 (새로 추가될 UI 스타일 활용) */}
+                <div className="auth-tabs">
+                    <button
+                        className={`auth-tab ${!isSignup ? 'active' : ''}`}
+                        onClick={() => { setIsSignup(false); setErrorMsg(''); }}
+                    >
+                        로그인
+                    </button>
+                    <button
+                        className={`auth-tab ${isSignup ? 'active' : ''}`}
+                        onClick={() => { setIsSignup(true); setErrorMsg(''); }}
+                    >
+                        회원가입
+                    </button>
+                </div>
 
-                {/* 일반 폼 로그인 */}
-                <form onSubmit={handleEmailLogin}>
+                <h2 className="auth-title">
+                    {isSignup ? "JOIN THE SQUAD" : "WELCOME BACK"}
+                </h2>
+
+                <form onSubmit={handleAuthAction} className="auth-form">
+                    {isSignup && (
+                        <div className="input-group">
+                            <label className="input-label">닉네임</label>
+                            <input
+                                type="text"
+                                className="input-field"
+                                placeholder="나의 팀 이름 (예: 라이몬 중핵)"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                required={isSignup}
+                            />
+                        </div>
+                    )}
+
                     <div className="input-group">
-                        <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>이메일</label>
+                        <label className="input-label">이메일</label>
                         <input
                             type="email"
                             className="input-field"
-                            placeholder="user@example.com"
+                            placeholder="coach@inazuma.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
+
                     <div className="input-group">
-                        <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>비밀번호</label>
+                        <label className="input-label">비밀번호</label>
                         <input
                             type="password"
                             className="input-field"
-                            placeholder="비밀번호"
+                            placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>
 
-                    {/* 에러 메시지 출력 공간 */}
-                    {errorMsg && <p style={{ color: '#ff4d4f', fontSize: '0.9rem', textAlign: 'center', margin: '0.5rem 0' }}>{errorMsg}</p>}
+                    {errorMsg && <p className="auth-error-msg">{errorMsg}</p>}
 
-                    <button type="submit" className="btn" style={{ width: '100%', marginTop: '1rem', marginBottom: '1rem' }}>
-                        로그인
+                    <button type="submit" className="btn btn-glow" disabled={isLoading} style={{ width: '100%', marginTop: '1.5rem' }}>
+                        {isLoading ? '처리 중...' : (isSignup ? '시작하기' : '로그인')}
                     </button>
                 </form>
 
-                <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    — 또는 —
+                <div className="auth-divider">
+                    <span>또는</span>
                 </div>
 
-                {/* 구글 소셜 로그인 버튼 */}
                 <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="btn btn-secondary"
-                    style={{ width: '100%', background: '#ffffff', color: '#000000', border: 'none' }}
+                    className="btn btn-social"
                 >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style={{ width: '20px', height: '20px' }} />
-                    구글 계정으로 로그인
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="social-icon" />
+                    {isSignup ? '구글로 빠르게 가입' : '구글로 계속하기'}
                 </button>
             </div>
         </div>
