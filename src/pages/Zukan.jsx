@@ -42,7 +42,7 @@ export default function Zukan() {
             </div>
 
             {/* 검색 및 필터 컨트롤 창 */}
-            <div className="card" style={{ marginBottom: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#fff' }}>
+            <div className="card" style={{ marginBottom: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-surface)' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
 
                     <div style={{ flex: '1 1 300px', position: 'relative' }}>
@@ -53,7 +53,7 @@ export default function Zukan() {
                             value={searchTerm}
                             onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                             className="input-field"
-                            style={{ paddingLeft: '2.8rem', background: '#F8FAFC' }}
+                            style={{ paddingLeft: '2.8rem', background: 'var(--bg-color)' }}
                         />
                     </div>
 
@@ -64,7 +64,7 @@ export default function Zukan() {
                                 key={elem}
                                 onClick={() => { setFilterElement(elem); setPage(1); }}
                                 style={{
-                                    background: filterElement === elem ? 'var(--primary-color)' : '#F1F5F9',
+                                    background: filterElement === elem ? 'var(--primary-color)' : 'var(--bg-color)',
                                     color: filterElement === elem ? '#fff' : 'var(--text-main)',
                                     border: 'none', padding: '0.5rem 1rem', borderRadius: '30px', fontWeight: 600,
                                     cursor: 'pointer', transition: 'all 0.2s'
@@ -89,7 +89,7 @@ export default function Zukan() {
             }}>
                 {displayedCharacters.map((char, index) => (
                     <div key={char.id || index} style={{
-                        background: '#fff',
+                        background: 'var(--bg-surface)',
                         borderRadius: '16px',
                         border: '1px solid var(--border-color)',
                         overflow: 'hidden',
@@ -102,7 +102,7 @@ export default function Zukan() {
                     >
                         <div style={{
                             height: '180px',
-                            background: '#F1F5F9',
+                            background: 'var(--bg-color)',
                             display: 'flex', justifyContent: 'center', alignItems: 'center',
                             position: 'relative',
                             padding: '1rem'

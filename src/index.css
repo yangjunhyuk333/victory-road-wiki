@@ -39,11 +39,6 @@ body {
   font-family: 'Outfit', 'Noto Sans KR', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
-  background-image: url('./assets/bg_image.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
