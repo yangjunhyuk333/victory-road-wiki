@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './config/firebase';
@@ -50,7 +50,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename="/victory-road-wiki">
+    <HashRouter>
       {/* 네비게이션 바에 사용자 정보를 전달하여 버튼 동적 변경 */}
       <Navbar user={user} />
       <Routes>
@@ -66,7 +66,7 @@ function App() {
         {/* 로그인 페이지 라우트 */}
         <Route path="/login" element={<Login user={user} />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
