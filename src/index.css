@@ -39,10 +39,10 @@ body {
   font-family: 'Outfit', 'Noto Sans KR', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-main);
-  /* 매우 은은하고 밝은 그라데이션 베이스 */
-  background-image:
-    radial-gradient(circle at 15% 0%, rgba(37, 99, 235, 0.04), transparent 50%),
-    radial-gradient(circle at 85% 100%, rgba(251, 191, 36, 0.05), transparent 50%);
+  background-image: url('./assets/bg_image.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
