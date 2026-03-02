@@ -8,109 +8,95 @@ export default function Home() {
     ];
 
     const characterList = [
-        { id: 1, name: '사사나미 운메이', role: '매니저', element: '무', img: 'https://placehold.co/100x100/1e293b/fff?text=UNMEI' },
-        { id: 2, name: '엔도 하루', role: '스트라이커', element: '풍', img: 'https://placehold.co/100x100/fca311/000?text=HARU' },
-        { id: 3, name: '고엔지 슈야', role: '레전드', element: '화', img: 'https://placehold.co/100x100/ff3366/fff?text=GOUENJI' },
+        { id: 1, name: '사사나미 운메이', role: '매니저', element: '무', img: 'https://placehold.co/100x100/CBD5E1/0F172A?text=UNMEI' },
+        { id: 2, name: '엔도 하루', role: '스트라이커', element: '풍', img: 'https://placehold.co/100x100/FBBF24/0F172A?text=HARU' },
+        { id: 3, name: '고엔지 슈야', role: '레전드', element: '화', img: 'https://placehold.co/100x100/EF4444/FFFFFF?text=GOUENJI' },
     ];
 
     return (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem 1rem' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2vw 1rem' }}>
 
-            {/* 프리미엄 히어로 섹션 */}
-            <header style={{
-                textAlign: 'center',
-                marginBottom: '5rem',
-                padding: '6rem 1rem',
-                background: 'radial-gradient(ellipse at center, rgba(20,20,25,0.8) 0%, transparent 70%)',
-                borderRadius: '30px',
-                position: 'relative'
-            }}>
-                {/* 장식용 네온 바 */}
-                <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: '150px', height: '3px', background: 'var(--primary-color)', boxShadow: '0 0 15px var(--primary-color)' }}></div>
-
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0, 240, 255, 0.1)', padding: '0.4rem 1rem', borderRadius: '30px', border: '1px solid rgba(0, 240, 255, 0.3)', color: 'var(--secondary-color)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '1px' }}>
-                    <Zap size={14} /> NEW ERA OF SOCCER RPG
+            {/* 프리미엄 라이트 테마 히어로 섹션 */}
+            <header className="header-hero">
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#DBEAFE', padding: '0.4rem 1rem', borderRadius: '30px', color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 700, marginBottom: '1.2rem', letterSpacing: '0.5px' }}>
+                    <Zap size={14} fill="currentColor" /> NEW ERA OF SOCCER RPG
                 </div>
 
                 <h1 style={{
-                    fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
+                    fontSize: 'clamp(2.5rem, 6vw, 4rem)',
                     fontWeight: 800,
-                    margin: '0 0 1.5rem 0',
-                    lineHeight: 1.1,
-                    letterSpacing: '-1px'
+                    margin: '0 0 1rem 0',
+                    lineHeight: 1.15,
+                    letterSpacing: '-1.5px',
+                    color: 'var(--text-main)'
                 }}>
-                    영웅들의 <br />
+                    당신의 꿈으로 그리는<br />
                     <span style={{
-                        background: 'linear-gradient(to right, #ff3366, #fca311)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        textShadow: '0 0 30px rgba(255,51,102,0.3)'
-                    }}>빅토리로드</span> 위키
+                        color: 'var(--primary-color)',
+                    }}>빅토리 로드</span>
                 </h1>
 
                 <p style={{
-                    fontSize: '1.2rem',
+                    fontSize: 'clamp(1rem, 2vw, 1.2rem)',
                     color: 'var(--text-muted)',
-                    maxWidth: '600px',
+                    maxWidth: '650px',
                     margin: '0 auto 2.5rem auto',
                     lineHeight: 1.6
                 }}>
-                    전설로 남을 당신만의 드림팀을 구축하세요. 최신 메타 분석, 선수 DB, 그리고 심층 공략이 준비되어 있습니다.
+                    최고의 정보, 선수 데이터베이스베이스베이스, 그리고 당신의 승리를 위한 특급 공략이 이곳에 모두 준비되어 있습니다.
                 </p>
 
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <button className="btn btn-glow">공략 보기 <ArrowRight size={18} /></button>
-                    <button className="btn btn-secondary">캐릭터 도감</button>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button className="btn btn-primary" style={{ minWidth: '140px' }}>공략 보기 <ArrowRight size={18} /></button>
+                    <button className="btn btn-secondary" style={{ minWidth: '140px' }}>캐릭터 도감</button>
                 </div>
             </header>
 
-            {/* 대시보드 그리드 형태의 콘텐츠 레이아웃 */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                gap: '2rem'
-            }}>
+            {/* 대시보드 형태의 반응형 그리드 */}
+            <div className="grid-container">
 
                 {/* 최신 뉴스 구역 */}
                 <section className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', margin: 0, fontSize: '1.4rem' }}>
-                            <div style={{ padding: '8px', background: 'rgba(0, 240, 255, 0.1)', borderRadius: '10px' }}>
-                                <BookOpen color="var(--secondary-color)" size={20} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>
+                            <div style={{ padding: '8px', background: '#EFF6FF', borderRadius: '10px' }}>
+                                <BookOpen color="var(--primary-color)" size={20} />
                             </div>
                             최신 정보
                         </h2>
-                        <a href="#" style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>더보기</a>
+                        <a href="#" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>더보기</a>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {newsList.map((news) => (
                             <div key={news.id} style={{
-                                padding: '1rem',
-                                background: 'rgba(0,0,0,0.3)',
+                                padding: '1.25rem 1rem',
+                                background: '#F8FAFC',
                                 borderRadius: '12px',
-                                border: '1px solid transparent',
-                                transition: 'border 0.3s',
+                                border: '1px solid #F1F5F9',
+                                transition: 'all 0.2s',
                                 cursor: 'pointer'
                             }}
-                                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--glass-border)'}
-                                onMouseOut={e => e.currentTarget.style.borderColor = 'transparent'}
+                                onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = '#FFFFFF'; }}
+                                onMouseOut={e => { e.currentTarget.style.borderColor = '#F1F5F9'; e.currentTarget.style.background = '#F8FAFC'; }}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: news.tag === 'OFFICIAL' ? 'var(--primary-color)' : 'var(--accent-color)' }}>{news.tag}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '20px', background: news.tag === 'OFFICIAL' ? '#DBEAFE' : '#FEF3C7', color: news.tag === 'OFFICIAL' ? '#1D4ED8' : '#B45309' }}>
+                                        {news.tag}
+                                    </span>
                                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{news.date}</span>
                                 </div>
-                                <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.4 }}>{news.title}</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.05rem', lineHeight: 1.4, color: 'var(--text-main)', fontWeight: 600 }}>{news.title}</h3>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* 주목받는 선수(캐릭터) 구역 */}
+                {/* 주목받는 선수 구역 */}
                 <section className="card">
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '2rem', fontSize: '1.4rem' }}>
-                        <div style={{ padding: '8px', background: 'rgba(252, 163, 17, 0.1)', borderRadius: '10px' }}>
-                            <Users color="var(--accent-color)" size={20} />
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem', fontSize: '1.3rem', fontWeight: 800 }}>
+                        <div style={{ padding: '8px', background: '#FEF3C7', borderRadius: '10px' }}>
+                            <Users color="#D97706" size={20} />
                         </div>
                         주목받는 선수
                     </h2>
@@ -121,28 +107,27 @@ export default function Home() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '1rem',
-                                background: 'linear-gradient(90deg, rgba(0,0,0,0.4) 0%, rgba(20,20,25,0) 100%)',
                                 padding: '0.8rem',
-                                borderRadius: '16px',
-                                transition: 'transform 0.2s',
+                                borderRadius: '12px',
+                                transition: 'background 0.2s',
                                 cursor: 'pointer'
                             }}
-                                onMouseOver={e => e.currentTarget.style.transform = 'translateX(5px)'}
-                                onMouseOut={e => e.currentTarget.style.transform = 'translateX(0)'}
+                                onMouseOver={e => e.currentTarget.style.background = '#F1F5F9'}
+                                onMouseOut={e => e.currentTarget.style.background = 'transparent'}
                             >
-                                <img src={char.img} alt={char.name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--glass-border)' }} />
+                                <img src={char.img} alt={char.name} style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
                                 <div style={{ flex: 1 }}>
-                                    <h3 style={{ margin: '0 0 0.2rem 0', fontSize: '1.1rem' }}>{char.name}</h3>
+                                    <h3 style={{ margin: '0 0 0.2rem 0', fontSize: '1.05rem', color: 'var(--text-main)', fontWeight: 700 }}>{char.name}</h3>
                                     <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{char.role}</span>
                                 </div>
                                 <div style={{
                                     width: '32px', height: '32px',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'rgba(255,255,255,0.05)',
+                                    background: char.element === '화' ? '#FEE2E2' : char.element === '풍' ? '#D1FAE5' : '#F1F5F9',
                                     borderRadius: '50%',
-                                    fontSize: '0.9rem',
+                                    fontSize: '0.85rem',
                                     fontWeight: 800,
-                                    color: char.element === '화' ? '#ff3366' : char.element === '풍' ? '#00f0ff' : '#fff'
+                                    color: char.element === '화' ? '#EF4444' : char.element === '풍' ? '#059669' : '#64748B'
                                 }}>
                                     {char.element}
                                 </div>
@@ -153,43 +138,46 @@ export default function Home() {
 
                 {/* 추천 공략 게시판 구역 */}
                 <section className="card" style={{ gridColumn: '1 / -1' }}>
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1.5rem', fontSize: '1.4rem' }}>
-                        <div style={{ padding: '8px', background: 'rgba(255, 51, 102, 0.1)', borderRadius: '10px' }}>
-                            <Trophy color="var(--primary-color)" size={20} />
-                        </div>
-                        에디터 추천 공략
-                    </h2>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>
+                            <div style={{ padding: '8px', background: '#FCE7F3', borderRadius: '10px' }}>
+                                <Trophy color="#DB2777" size={20} />
+                            </div>
+                            에디터 추천 공략
+                        </h2>
+                    </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div className="grid-container">
                         <div style={{
-                            background: 'linear-gradient(145deg, rgba(255, 51, 102, 0.15), rgba(0,0,0,0.4))',
+                            background: '#FFFFFF',
                             padding: '1.5rem',
                             borderRadius: '16px',
-                            border: '1px solid rgba(255,51,102,0.2)',
+                            border: '1px solid #E2E8F0',
                             position: 'relative',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                         }}>
-                            <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.1 }}><Star size={100} /></div>
+                            <div style={{ position: 'absolute', top: '-15px', right: '-15px', opacity: 0.05 }}><Star size={80} fill="#DB2777" /></div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                <span style={{ background: 'var(--primary-color)', color: '#fff', fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '20px', fontWeight: 800 }}>HOT</span>
+                                <span style={{ background: '#DB2777', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>HOT</span>
                             </div>
-                            <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.2rem', position: 'relative', zIndex: 1 }}>무과금 V랭크 달성! 완벽한 팀 편성 가이드</h3>
-                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>속성 시너지와 패시브 스킬을 활용하여 최소 투자로 최대 효율을 뽑는 방법을 분석합니다.</p>
-                            <a href="#" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>읽기 <ArrowRight size={14} /></a>
+                            <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.15rem', position: 'relative', zIndex: 1, color: 'var(--text-main)', fontWeight: 800 }}>무과금 V랭크 달성! 완벽 팀 가이드</h3>
+                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>속성 시너지와 특결 스킬을 활용하여 가장 효율적인 스쿼드를 짜는 기본기를 공유합니다.</p>
+                            <a href="#" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-color)' }}>자세히 읽기 <ArrowRight size={14} /></a>
                         </div>
 
                         <div style={{
-                            background: 'linear-gradient(145deg, rgba(0, 240, 255, 0.1), rgba(0,0,0,0.4))',
+                            background: '#F8FAFC',
                             padding: '1.5rem',
                             borderRadius: '16px',
-                            border: '1px solid rgba(0,240,255,0.2)'
+                            border: '1px solid #E2E8F0',
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                                <span style={{ background: 'var(--secondary-color)', color: '#000', fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '20px', fontWeight: 800 }}>SYSTEM</span>
+                                <span style={{ background: '#3B82F6', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>SYSTEM</span>
                             </div>
-                            <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.2rem' }}>스크램블 배틀 심층 분석</h3>
-                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>신규 배틀 시스템에서 승리하기 위한 타이밍 기법과 볼 키핑 팁.</p>
-                            <a href="#" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--secondary-color)' }}>읽기 <ArrowRight size={14} /></a>
+                            <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1.15rem', color: 'var(--text-main)', fontWeight: 800 }}>스크램블 배틀 심층 팁</h3>
+                            <p style={{ margin: '0 0 1.5rem 0', fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>신규 배틀 조작 및 수비수 돌파 타이밍의 핵심 팁을 움짤과 함께 알아봅니다.</p>
+                            <a href="#" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-color)' }}>자세히 읽기 <ArrowRight size={14} /></a>
                         </div>
                     </div>
                 </section>
