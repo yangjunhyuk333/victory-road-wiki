@@ -24,6 +24,16 @@
   --hover-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15), 0 8px 10px -6px rgba(37, 99, 235, 0.1);
 }
 
+[data-theme="dark"] {
+  --bg-color: #0F172A;
+  --bg-surface: #1E293B;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border-color: #334155;
+  --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --hover-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+}
+
 body {
   margin: 0;
   font-family: 'Outfit', 'Noto Sans KR', sans-serif;
@@ -36,10 +46,12 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
   box-sizing: border-box;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 a {
@@ -57,8 +69,10 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 2rem;
+  background: var(--bg-surface);
+  /* 불투명도 약간 제거하여 다크/라이트 테마에 모두 맞춤 */
+  opacity: 0.98;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
@@ -128,15 +142,15 @@ a:hover {
 
 /* 서브 버튼 */
 .btn-secondary {
-  background: #fff;
+  background: var(--bg-surface);
   color: var(--text-main);
   border: 1px solid var(--border-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
-  background: #F1F5F9;
-  border-color: #CBD5E1;
+  background: var(--bg-color);
+  border-color: var(--text-muted);
   transform: translateY(-1px);
 }
 

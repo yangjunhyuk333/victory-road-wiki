@@ -1,4 +1,5 @@
 import { Trophy, BookOpen, Users, Star, ArrowRight, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
     const newsList = [
@@ -22,19 +23,21 @@ export default function Home() {
                     <Zap size={14} fill="currentColor" /> NEW ERA OF SOCCER RPG
                 </div>
 
-                <h1 style={{
-                    fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-                    fontWeight: 800,
-                    margin: '0 0 1rem 0',
-                    lineHeight: 1.15,
-                    letterSpacing: '-1.5px',
-                    color: 'var(--text-main)'
-                }}>
-                    당신의 꿈으로 그리는<br />
-                    <span style={{
-                        color: 'var(--primary-color)',
-                    }}>빅토리 로드</span>
-                </h1>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <img
+                        src="/logo.png"
+                        alt="이나즈마 스테이션 로고"
+                        style={{ maxWidth: '80%', maxHeight: '120px', objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                        }}
+                    />
+                    <h1 style={{ display: 'none', fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, margin: '0 0 1rem 0', lineHeight: 1.15, letterSpacing: '-1.5px', color: 'var(--text-main)' }}>
+                        당신의 꿈으로 그리는<br />
+                        <span style={{ color: 'var(--primary-color)' }}>빅토리 로드</span>
+                    </h1>
+                </div>
 
                 <p style={{
                     fontSize: 'clamp(1rem, 2vw, 1.2rem)',
@@ -43,12 +46,12 @@ export default function Home() {
                     margin: '0 auto 2.5rem auto',
                     lineHeight: 1.6
                 }}>
-                    최고의 정보, 선수 데이터베이스베이스베이스, 그리고 당신의 승리를 위한 특급 공략이 이곳에 모두 준비되어 있습니다.
+                    최고의 정보, 5,400여 명의 선수 데이터베이스, 그리고 당신의 승리를 위한 특급 공략이 이곳에 모두 준비되어 있습니다.
                 </p>
 
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button className="btn btn-primary" style={{ minWidth: '140px' }}>공략 보기 <ArrowRight size={18} /></button>
-                    <button className="btn btn-secondary" style={{ minWidth: '140px' }}>캐릭터 도감</button>
+                    <Link to="/zukan" className="btn btn-secondary" style={{ minWidth: '140px', textDecoration: 'none' }}>공식 캐릭터 도감</Link>
                 </div>
             </header>
 
