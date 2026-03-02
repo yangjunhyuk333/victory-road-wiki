@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import charactersData from '../data/characters.json';
-import { Search, Filter, Shield, Zap, Flame, Wind } from 'lucide-react';
+import { Search, Filter, Shield, TreePine, Flame, Wind } from 'lucide-react';
 
 export default function Zukan() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -13,7 +13,7 @@ export default function Zukan() {
         switch (elem) {
             case '화': return <Flame size={14} color="#EF4444" />;
             case '풍': return <Wind size={14} color="#059669" />;
-            case '림': return <Zap size={14} color="#7C3AED" />;
+            case '림': return <TreePine size={14} color="#7C3AED" />;
             case '산': return <Shield size={14} color="#D97706" />;
             default: return null;
         }
