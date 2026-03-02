@@ -4,6 +4,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './config/firebase';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Zukan from './pages/Zukan';
 
 // 인증된 사용자만 접근을 허용하는 보호 라우트 컴포넌트
 function PrivateRoute({ children, user, loading }) {
@@ -24,8 +25,13 @@ function Navbar({ user }) {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="logo">V-ROAD WIKI</Link>
-      <div className="nav-links">
+      <Link to="/" className="logo">
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="이나즈마 스테이션" style={{ height: '54px', objectFit: 'contain' }} onError={(e) => e.target.style.display = 'none'} />
+      </Link>
+      <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <Link to="/zukan" className="btn btn-secondary" style={{ border: 'none', background: 'transparent', boxShadow: 'none', fontSize: '1rem' }}>
+          캐릭터 도감 DB
+        </Link>
         {user ? (
           <button onClick={handleLogout} className="btn btn-secondary">로그아웃</button>
         ) : (
@@ -60,6 +66,15 @@ function App() {
           element={
             <PrivateRoute user={user} loading={loading}>
               <Home />
+            </PrivateRoute>
+          }
+        />
+        {/* 대규모 캐릭터 도감 라우트 */}
+        <Route
+          path="/zukan"
+          element={
+            <PrivateRoute user={user} loading={loading}>
+              <Zukan />
             </PrivateRoute>
           }
         />
