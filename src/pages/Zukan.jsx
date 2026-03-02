@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import charactersData from '../data/characters.json';
-import { Search, Filter, Shield, TreePine, Flame, Wind } from 'lucide-react';
+import { Search, Filter, Mountain, TreePine, Flame, Wind } from 'lucide-react';
 
 export default function Zukan() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -12,9 +12,9 @@ export default function Zukan() {
     const getElementIcon = (elem) => {
         switch (elem) {
             case '화': return <Flame size={14} color="#EF4444" />;
-            case '풍': return <Wind size={14} color="#059669" />;
-            case '림': return <TreePine size={14} color="#7C3AED" />;
-            case '산': return <Shield size={14} color="#D97706" />;
+            case '풍': return <Wind size={14} color="#3B82F6" />;
+            case '림': return <TreePine size={14} color="#10B981" />;
+            case '산': return <Mountain size={14} color="#F59E0B" />;
             default: return null;
         }
     };
@@ -139,8 +139,8 @@ export default function Zukan() {
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                                 <div style={{
                                     display: 'flex', alignItems: 'center', gap: '0.3rem',
-                                    background: char.element === '화' ? '#FEE2E2' : char.element === '풍' ? '#D1FAE5' : char.element === '림' ? '#EDE9FE' : char.element === '산' ? '#FEF3C7' : '#F1F5F9',
-                                    color: char.element === '화' ? '#EF4444' : char.element === '풍' ? '#059669' : char.element === '림' ? '#7C3AED' : char.element === '산' ? '#D97706' : '#64748B',
+                                    background: char.element === '화' ? '#FEE2E2' : char.element === '풍' ? '#DBEAFE' : char.element === '림' ? '#D1FAE5' : char.element === '산' ? '#FEF3C7' : '#F1F5F9',
+                                    color: char.element === '화' ? '#EF4444' : char.element === '풍' ? '#3B82F6' : char.element === '림' ? '#10B981' : char.element === '산' ? '#F59E0B' : '#64748B',
                                     padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700
                                 }}>
                                     {getElementIcon(char.element)}
