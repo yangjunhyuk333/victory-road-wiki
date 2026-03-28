@@ -382,4 +382,8 @@ a:hover {
     padding: 2rem 1rem;
     margin-bottom: 2rem;
   }
+
+  .login-image-column {
+    display: none !important;
+  }
 }

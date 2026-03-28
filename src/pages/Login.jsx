@@ -59,21 +59,17 @@ export default function Login({ user }) {
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: 'calc(100vh - 87px)',
-            padding: '1.5rem',
-            backgroundImage: `url(${import.meta.env.BASE_URL}assets/bg_image.png)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            position: 'relative'
-        }}>
-            {/* 배경을 약간 어둡게 눌러주어 가독성 확보 */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', pointerEvents: 'none' }}></div>
-
+        <div style={{ display: 'flex', minHeight: 'calc(100vh - 87px)' }}>
+            {/* 좌측: 로그인 폼 영역 */}
+            <div style={{
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '1.5rem',
+                backgroundColor: 'var(--bg-color)',
+                position: 'relative'
+            }}>
             <div className="auth-card" style={{
                 position: 'relative',
                 zIndex: 10,
@@ -159,6 +155,19 @@ export default function Login({ user }) {
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="social-icon" />
                     {isSignup ? '구글 계정으로 시작' : '구글 계정으로 로그인'}
                 </button>
+            </div>
+            </div>
+
+            {/* 우측: 배경 이미지 영역 */}
+            <div className="login-image-column" style={{
+                flex: 1.2,
+                backgroundImage: `url(${import.meta.env.BASE_URL}assets/bg_image.png)`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                position: 'relative'
+            }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', pointerEvents: 'none' }}></div>
             </div>
         </div>
     );
