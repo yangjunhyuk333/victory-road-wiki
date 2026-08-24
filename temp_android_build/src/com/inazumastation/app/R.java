@@ -8,10 +8,85 @@
 package com.inazumastation.app;
 
 public final class R {
+  public static final class color {
+    public static final int bg_card=0x7f010000;
+    public static final int bg_card_light=0x7f010001;
+    public static final int bg_dark=0x7f010002;
+    public static final int border_subtle=0x7f010003;
+    public static final int cyan_accent=0x7f010004;
+    public static final int elem_earth=0x7f010005;
+    public static final int elem_fire=0x7f010006;
+    public static final int elem_void=0x7f010007;
+    /**
+     * 속성 컬러
+     */
+    public static final int elem_wind=0x7f010008;
+    public static final int elem_wood=0x7f010009;
+    public static final int gold_glow=0x7f01000a;
+    public static final int gold_primary=0x7f01000b;
+    public static final int pos_df=0x7f01000c;
+    public static final int pos_fw=0x7f01000d;
+    /**
+     * 포지션 컬러
+     */
+    public static final int pos_gk=0x7f01000e;
+    public static final int pos_mf=0x7f01000f;
+    public static final int text_muted=0x7f010010;
+    public static final int text_white=0x7f010011;
+  }
+  public static final class drawable {
+    public static final int bg_badge_generic=0x7f020000;
+    public static final int bg_btn_gold=0x7f020001;
+    public static final int bg_card=0x7f020002;
+    public static final int bg_card_gold=0x7f020003;
+    public static final int bg_search=0x7f020004;
+  }
+  public static final class id {
+    public static final int btn_back=0x7f030000;
+    public static final int btn_filter_all=0x7f030001;
+    public static final int btn_filter_earth=0x7f030002;
+    public static final int btn_filter_fire=0x7f030003;
+    public static final int btn_filter_wind=0x7f030004;
+    public static final int btn_filter_wood=0x7f030005;
+    public static final int btn_toggle_lang=0x7f030006;
+    public static final int et_search=0x7f030007;
+    public static final int iv_detail_thumb=0x7f030008;
+    public static final int iv_player_thumb=0x7f030009;
+    public static final int list_players=0x7f03000a;
+    public static final int tv_detail_desc=0x7f03000b;
+    public static final int tv_detail_elem=0x7f03000c;
+    public static final int tv_detail_extra=0x7f03000d;
+    public static final int tv_detail_kana=0x7f03000e;
+    public static final int tv_detail_name=0x7f03000f;
+    public static final int tv_detail_pos=0x7f030010;
+    public static final int tv_detail_stats=0x7f030011;
+    public static final int tv_detail_title=0x7f030012;
+    public static final int tv_player_count=0x7f030013;
+    public static final int tv_player_desc_preview=0x7f030014;
+    public static final int tv_player_element=0x7f030015;
+    public static final int tv_player_name=0x7f030016;
+    public static final int tv_player_pos=0x7f030017;
+    public static final int tv_player_series=0x7f030018;
+  }
+  public static final class layout {
+    public static final int activity_main=0x7f040000;
+    public static final int activity_player_detail=0x7f040001;
+    public static final int item_player=0x7f040002;
+  }
   public static final class mipmap {
-    public static final int ic_launcher=0x7f010000;
+    public static final int ic_launcher=0x7f050000;
   }
   public static final class string {
-    public static final int app_name=0x7f020000;
+    public static final int app_name=0x7f060000;
+    public static final int back=0x7f060001;
+    public static final int btn_original_ja=0x7f060002;
+    public static final int btn_translated_ko=0x7f060003;
+    public static final int search_hint=0x7f060004;
+    public static final int tab_info=0x7f060005;
+    public static final int tab_moves=0x7f060006;
+    public static final int tab_players=0x7f060007;
+  }
+  public static final class style {
+    public static final int AppTheme=0x7f070000;
   }
 }
