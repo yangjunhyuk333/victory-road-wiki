@@ -36,7 +36,7 @@ export default function PlayerDetail() {
       return;
     }
 
-    const cacheKey = `inazuma_trans_v3_${player.id}`;
+    const cacheKey = `inazuma_trans_v5_${player.id}`;
     if (!forceRefresh) {
       try {
         const cached = localStorage.getItem(cacheKey);
