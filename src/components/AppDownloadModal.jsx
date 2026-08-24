@@ -308,11 +308,10 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             </p>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-                                {/* APK 직접 다운로드 버튼 */}
+                                {/* APK 직접 다운로드 버튼 (사이트 내부 즉시 다운로드) */}
                                 <a
-                                    href="https://github.com/yangjunhyuk333/victory-road-wiki/releases"
-                                    target="_blank"
-                                    rel="noreferrer"
+                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation.apk`}
+                                    download="InazumaStation.apk"
                                     style={{
                                         background: 'linear-gradient(135deg, #10B981, #059669)',
                                         color: '#fff',
@@ -325,10 +324,11 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.5rem',
-                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                                        cursor: 'pointer'
                                     }}
                                 >
-                                    <Download size={16} /> InazumaStation.apk 직접 다운로드
+                                    <Download size={16} /> InazumaStation.apk 직접 다운로드 (원클릭)
                                 </a>
 
                                 {/* 원클릭 모바일 앱 설치 (PWA) */}
