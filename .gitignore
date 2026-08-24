@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 dist_app
+InazumaStation_App
 dist_electron
 temp_electron_build
 *.local

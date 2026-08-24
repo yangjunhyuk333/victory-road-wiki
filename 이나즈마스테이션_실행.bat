@@ -2,9 +2,9 @@
 chcp 65001 > nul
 title 이나즈마 스테이션 실행기
 
-:: 1. 이미 패키징된 .exe 프로그램이 있다면 즉시 독립 실행합니다.
-if exist "dist_app\이나즈마 스테이션-win32-x64\이나즈마 스테이션.exe" (
-    start "" "dist_app\이나즈마 스테이션-win32-x64\이나즈마 스테이션.exe"
+:: 1. 이미 빌드된 독립 실행 파일(InazumaStation.exe)이 있다면 즉시 실행합니다.
+if exist "InazumaStation_App\InazumaStation-win32-x64\InazumaStation.exe" (
+    start "" "InazumaStation_App\InazumaStation-win32-x64\InazumaStation.exe"
     exit
 )
 
