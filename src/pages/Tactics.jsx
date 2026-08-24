@@ -474,8 +474,9 @@ export default function Tactics() {
     };
 
     // ⚡ 실시간 자동 수정(Auto-Save) 훅:
-    // 사용자가 선수를 변경하거나 드래그하는 등 직접 수정한 경우(isDirtyRef.current === true)에만 500ms 디바운스로 로컬스토리지에 자동 덮어씁니다.
-    // 단순 전술 불러오기(Load)나 초기 렌더링 시에는 절대 실행되지 않습니다.
+    // 사용자가 불러와서 현재 수정 중인 항목(editingTacticsId 또는 editingFormationId)이 있을 때만
+    // 사용자의 직접 조작(isDirtyRef.current === true)을 500ms 디바운스로 로컬스토리지에 안전하게 자동 덮어씁니다.
+    // 신규 작성 모드이거나 단순 조회 시에는 다른 기존 전술로 강제 이동되거나 덮어쓰지 않습니다.
     useEffect(() => {
         // 첫 렌더링 시에는 자동 수정을 건너뜁니다.
         if (isInitialMount.current) {
@@ -486,10 +487,12 @@ export default function Tactics() {
         // 사용자가 직접 변경을 가하지 않은 단순 로드/조회 상태거나 자동 저장이 꺼져 있으면 즉시 중단
         if (!isDirtyRef.current || !isAutoSave) return;
 
+        // 수정 중인 ID가 전혀 없는 신규 작성 상태면 기존 전술을 멋대로 덮어쓰지 않도록 차단
+        if (!editingTacticsId && !editingFormationId) return;
+
         const currentEditingId = editingTacticsId;
+        const currentEditingFormId = editingFormationId;
         const title = tacticsTitle.trim();
-        // 수정 중인 전술 ID가 없거나 제목이 아예 없으면 미완성 신규 등록을 방지하기 위해 자동 수정 대기
-        if (!currentEditingId && !title) return;
 
         if (autoSaveTimerRef.current) {
             clearTimeout(autoSaveTimerRef.current);
@@ -500,44 +503,70 @@ export default function Tactics() {
             if (!isDirtyRef.current) return;
 
             try {
-                const localData = localStorage.getItem('victory_road_tactics');
-                const currentList = localData ? JSON.parse(localData) : [];
+                if (currentEditingId) {
+                    // [전술 팩 자동 수정]
+                    const localData = localStorage.getItem('victory_road_tactics');
+                    const currentList = localData ? JSON.parse(localData) : [];
 
-                const existingIndex = currentList.findIndex(item => 
-                    (currentEditingId && item.id === currentEditingId) || 
-                    (title && item.title.trim().toLowerCase() === title.toLowerCase())
-                );
+                    const existingIndex = currentList.findIndex(item => item.id === currentEditingId);
 
-                if (existingIndex !== -1) {
-                    setAutoSaveStatus('saving');
-                    const targetItem = currentList[existingIndex];
-                    const updatedItem = {
-                        ...targetItem,
-                        title: title || targetItem.title,
-                        formation: selectedFormation,
-                        squad: squad,
-                        bench: bench,
-                        coach: coach,
-                        positions: positions,
-                        updatedAt: new Date().toISOString()
-                    };
+                    if (existingIndex !== -1) {
+                        setAutoSaveStatus('saving');
+                        const targetItem = currentList[existingIndex];
+                        const updatedItem = {
+                            ...targetItem,
+                            title: title || targetItem.title,
+                            formation: selectedFormation,
+                            squad: squad,
+                            bench: bench,
+                            coach: coach,
+                            positions: positions,
+                            updatedAt: new Date().toISOString()
+                        };
 
-                    const nextList = [...currentList];
-                    nextList[existingIndex] = updatedItem;
-                    localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
+                        const nextList = [...currentList];
+                        nextList[existingIndex] = updatedItem;
+                        localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
 
-                    if (!editingTacticsId) {
-                        setEditingTacticsId(targetItem.id);
+                        isDirtyRef.current = false; // 자동 저장 완료로 더티 플래그 안전하게 초기화
+                        setAutoSaveStatus('saved');
+                        fetchSavedTacticsList();
+
+                        // 2.5초 후 대기 상태로 원복
+                        setTimeout(() => {
+                            setAutoSaveStatus('idle');
+                        }, 2500);
                     }
+                } else if (currentEditingFormId) {
+                    // [포메이션 팩 자동 수정]
+                    const localData = localStorage.getItem('victory_road_formations');
+                    const currentList = localData ? JSON.parse(localData) : [];
 
-                    isDirtyRef.current = false; // 자동 저장 완료로 더티 플래그 안전하게 초기화
-                    setAutoSaveStatus('saved');
-                    fetchSavedTacticsList();
+                    const existingIndex = currentList.findIndex(item => item.id === currentEditingFormId);
 
-                    // 2.5초 후 대기 상태로 원복
-                    setTimeout(() => {
-                        setAutoSaveStatus('idle');
-                    }, 2500);
+                    if (existingIndex !== -1) {
+                        setAutoSaveStatus('saving');
+                        const targetItem = currentList[existingIndex];
+                        const updatedItem = {
+                            ...targetItem,
+                            title: title || targetItem.title,
+                            formation: selectedFormation,
+                            positions: positions.map(p => ({ id: p.id, role: p.role, top: p.top, left: p.left })),
+                            updatedAt: new Date().toISOString()
+                        };
+
+                        const nextList = [...currentList];
+                        nextList[existingIndex] = updatedItem;
+                        localStorage.setItem('victory_road_formations', JSON.stringify(nextList));
+
+                        isDirtyRef.current = false;
+                        setAutoSaveStatus('saved');
+                        fetchSavedFormationsList();
+
+                        setTimeout(() => {
+                            setAutoSaveStatus('idle');
+                        }, 2500);
+                    }
                 }
             } catch (error) {
                 console.error("자동 수정 중 오류:", error);
@@ -549,11 +578,14 @@ export default function Tactics() {
                 clearTimeout(autoSaveTimerRef.current);
             }
         };
-    }, [squad, bench, coach, positions, selectedFormation, tacticsTitle, isAutoSave, editingTacticsId]);
+    }, [squad, bench, coach, positions, selectedFormation, tacticsTitle, isAutoSave, editingTacticsId, editingFormationId]);
 
     // ✨ 스마트 포메이션 자동 정렬 / 중앙 보정 기능
     const handleAutoAlignPositions = () => {
-        isDirtyRef.current = true; // 사용자의 직접 조작 감지
+        // 수정 중인 전술이나 포메이션이 있는 경우에만 자동 저장 큐에 플래그 설정
+        if (editingTacticsId || editingFormationId) {
+            isDirtyRef.current = true;
+        }
         setPositions(prevPositions => {
             return prevPositions.map(pos => {
                 // 중앙(X=50) 근처의 노드는 50%로 깔끔하게 중앙 흡착
@@ -783,6 +815,7 @@ export default function Tactics() {
         if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
         isDirtyRef.current = false; // 로드 시에는 자동 수정 트리거 방지
         setAutoSaveStatus('idle');
+        setEditingTacticsId(null); // 전술 수정 ID 확실히 해제
         setPositions(formItem.positions || FORMATIONS['4-4-2']);
         setSelectedFormation('커스텀');
         setTacticsTitle(formItem.title);
