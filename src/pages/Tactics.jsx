@@ -836,20 +836,8 @@ export default function Tactics() {
     };
 
     return (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.25rem' }}>
             
-            {/* 1. 에디터 타이틀 상단 바 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
-                <div>
-                    <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-1px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Award size={26} color="var(--primary-color)" /> 전술 분석 에디터
-                    </h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem', fontWeight: 600 }}>
-                        자유 배치, 포메이션 커스텀 셋업 및 로컬 영속화 스토리지 컨트롤
-                    </p>
-                </div>
-            </div>
-
             {/* 2. 에디터 레이아웃 구조 적용 */}
             <div className="editor-layout">
                 
