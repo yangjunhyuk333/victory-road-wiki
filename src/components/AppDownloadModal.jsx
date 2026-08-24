@@ -440,21 +440,21 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Monitor size={18} color="#0EA5E9" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    Windows PC 전용 앱 설치 &amp; 실행
+                                    Windows PC 독립 실행형 로컬 프로그램 다운로드
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                인터넷 주소창 없는 깔끔한 독립 실행 프로그램 모드로 바탕화면에서 바로 켤 수 있습니다.
+                                웹 브라우저 창 없이 바탕화면에서 바로 켤 수 있는 고성능 윈도우 독립 실행형 프로그램(`InazumaStation.exe`) 압축본입니다.
                             </p>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {/* PWA 1초 웹 앱 설치 버튼 (강력 추천) */}
-                                <button
-                                    onClick={handleInstallPWA}
+                                {/* 윈도우 로컬 프로그램 압축본 다운로드 (최우선) */}
+                                <a
+                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation_Windows.tar.xz`}
+                                    download="InazumaStation_Windows.tar.xz"
                                     style={{
                                         background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
                                         color: '#fff',
-                                        border: 'none',
                                         borderRadius: '12px',
                                         padding: '0.85rem 1rem',
                                         fontWeight: 800,
@@ -463,14 +463,15 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.5rem',
-                                        cursor: 'pointer',
+                                        textDecoration: 'none',
                                         boxShadow: '0 4px 14px rgba(14, 165, 233, 0.35)',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        cursor: 'pointer'
                                     }}
                                 >
-                                    <Sparkles size={18} />
-                                    <span>⚡ Windows PC 앱 즉시 설치 (1초 완료)</span>
-                                </button>
+                                    <Download size={18} />
+                                    <span>💾 Windows 로컬 프로그램 압축본 다운로드 (89MB)</span>
+                                </a>
 
                                 {/* 윈도우 원클릭 데스크톱 런처 다운로드 */}
                                 <a
@@ -505,7 +506,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     color: 'var(--text-muted, #94a3b8)',
                                     lineHeight: 1.4
                                 }}>
-                                    💡 <strong>Chrome / Edge 브라우저 팁</strong>: 브라우저 상단 우측의 <code>앱 설치 (⊕)</code> 버튼을 누르시면 작업표시줄과 바탕화면에 고화질 독립 앱이 생성됩니다!
+                                    ✨ <strong>실행 방법</strong>: 다운로드받은 압축을 풀고 폴더 안의 <code>InazumaStation.exe</code>를 실행하시면 독립 프로그램으로 부드럽게 구동됩니다. (알집/반디집/탐색기 지원)
                                 </div>
                             </div>
                         </div>
