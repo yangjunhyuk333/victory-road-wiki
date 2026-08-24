@@ -164,6 +164,8 @@ export default function Tactics() {
     const [isAutoSave, setIsAutoSave] = useState(true);                  // 자동 수정 활성화 여부 (기본 ON)
     const [autoSaveStatus, setAutoSaveStatus] = useState('idle');        // 'idle' | 'saving' | 'saved'
     const isInitialMount = useRef(true);                                 // 첫 로드 시 자동 저장 방지용 ref
+    const isDirtyRef = useRef(false);                                    // 사용자가 실제로 변경을 가했을 때만 자동 수정 트리거
+    const autoSaveTimerRef = useRef(null);                               // 자동 수정 디바운스 타이머 ref
 
     // 선수 속성 미니 아이콘 반환
     const getElementIcon = (elem) => {
@@ -259,9 +261,12 @@ export default function Tactics() {
 
     // 포메이션 템플릿 변경 시 노드 위치 초기화
     const handleFormationChange = (formName) => {
+        isDirtyRef.current = true; // 사용자의 직접 조작 감지
         setSelectedFormation(formName);
         // 새로운 포메이션의 디폴트 위치값 세팅
-        setPositions(FORMATIONS[formName]);
+        if (FORMATIONS[formName]) {
+            setPositions(FORMATIONS[formName]);
+        }
     };
 
     // 1. 마우스 드래그 시작 핸들러 (PC 환경 대응 - DOM 직접 조작으로 60fps 프레임 보장)
@@ -313,6 +318,7 @@ export default function Tactics() {
             
             // 드래그가 끝나면 최종 변경된 위치 정보를 React 상태에 1회 동기화하여 영속화
             if (hasMoved) {
+                isDirtyRef.current = true; // 사용자의 직접 조작 감지
                 setSelectedFormation('커스텀');
                 setPositions(prev => prev.map(pos => 
                     pos.id === slotId ? { ...pos, top: finalTop, left: finalLeft } : pos
@@ -374,6 +380,7 @@ export default function Tactics() {
             
             // 터치 드래그 종료 시 최종 비율값 React 위치 상태에 1회 반영
             if (hasMoved) {
+                isDirtyRef.current = true; // 사용자의 직접 조작 감지
                 setSelectedFormation('커스텀');
                 setPositions(prev => prev.map(pos => 
                     pos.id === slotId ? { ...pos, top: finalTop, left: finalLeft } : pos
@@ -401,6 +408,7 @@ export default function Tactics() {
 
     // 선수/감독 모달창 바인딩 선택
     const handleSelectPlayer = (player) => {
+        isDirtyRef.current = true; // 사용자의 직접 조작 감지
         if (activeSlotId === 'coach') {
             // 1. 감독 슬롯 선택
             setCoach({
@@ -443,6 +451,7 @@ export default function Tactics() {
     // 배치된 선수/감독 지우기
     const handleClearSlot = (slotId, e) => {
         e.stopPropagation(); // 카드 자체의 클릭 이벤트 버블링 차단
+        isDirtyRef.current = true; // 사용자의 직접 조작 감지
         if (slotId === 'coach') {
             // 감독 비우기
             setCoach(null);
@@ -465,7 +474,8 @@ export default function Tactics() {
     };
 
     // ⚡ 실시간 자동 수정(Auto-Save) 훅:
-    // 전술을 불러와서 수정 중이거나 제목이 기존 전술과 일치할 때, 변경사항을 500ms 디바운스로 로컬스토리지에 자동 덮어쓰기(수정)합니다.
+    // 사용자가 선수를 변경하거나 드래그하는 등 직접 수정한 경우(isDirtyRef.current === true)에만 500ms 디바운스로 로컬스토리지에 자동 덮어씁니다.
+    // 단순 전술 불러오기(Load)나 초기 렌더링 시에는 절대 실행되지 않습니다.
     useEffect(() => {
         // 첫 렌더링 시에는 자동 수정을 건너뜁니다.
         if (isInitialMount.current) {
@@ -473,18 +483,28 @@ export default function Tactics() {
             return;
         }
 
-        if (!isAutoSave) return;
+        // 사용자가 직접 변경을 가하지 않은 단순 로드/조회 상태거나 자동 저장이 꺼져 있으면 즉시 중단
+        if (!isDirtyRef.current || !isAutoSave) return;
+
+        const currentEditingId = editingTacticsId;
         const title = tacticsTitle.trim();
         // 수정 중인 전술 ID가 없거나 제목이 아예 없으면 미완성 신규 등록을 방지하기 위해 자동 수정 대기
-        if (!editingTacticsId && !title) return;
+        if (!currentEditingId && !title) return;
 
-        const timer = setTimeout(() => {
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+        }
+
+        autoSaveTimerRef.current = setTimeout(() => {
+            // 실행 직전 한 번 더 isDirty 확인
+            if (!isDirtyRef.current) return;
+
             try {
                 const localData = localStorage.getItem('victory_road_tactics');
                 const currentList = localData ? JSON.parse(localData) : [];
 
                 const existingIndex = currentList.findIndex(item => 
-                    (editingTacticsId && item.id === editingTacticsId) || 
+                    (currentEditingId && item.id === currentEditingId) || 
                     (title && item.title.trim().toLowerCase() === title.toLowerCase())
                 );
 
@@ -510,6 +530,7 @@ export default function Tactics() {
                         setEditingTacticsId(targetItem.id);
                     }
 
+                    isDirtyRef.current = false; // 자동 저장 완료로 더티 플래그 안전하게 초기화
                     setAutoSaveStatus('saved');
                     fetchSavedTacticsList();
 
@@ -523,11 +544,16 @@ export default function Tactics() {
             }
         }, 500); // 500ms 디바운스
 
-        return () => clearTimeout(timer);
+        return () => {
+            if (autoSaveTimerRef.current) {
+                clearTimeout(autoSaveTimerRef.current);
+            }
+        };
     }, [squad, bench, coach, positions, selectedFormation, tacticsTitle, isAutoSave, editingTacticsId]);
 
     // ✨ 스마트 포메이션 자동 정렬 / 중앙 보정 기능
     const handleAutoAlignPositions = () => {
+        isDirtyRef.current = true; // 사용자의 직접 조작 감지
         setPositions(prevPositions => {
             return prevPositions.map(pos => {
                 // 중앙(X=50) 근처의 노드는 50%로 깔끔하게 중앙 흡착
@@ -542,6 +568,9 @@ export default function Tactics() {
 
     // 새 전술 작성 모드로 리셋하는 함수
     const handleNewTactics = () => {
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false; // 리셋 시 더티 플래그 해제
+        setAutoSaveStatus('idle');
         setEditingTacticsId(null);
         setEditingFormationId(null);
         setTacticsTitle('');
@@ -554,6 +583,8 @@ export default function Tactics() {
 
     // 현재의 전술판 배치 및 좌표 셋을 localStorage에 저장 또는 기존 전술 수정 (0ms 지연)
     const handleSaveTactics = () => {
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false; // 수동 저장 시 더티 플래그 해제
         const title = tacticsTitle.trim();
         if (!title) {
             showToast("전술 이름을 입력해 주세요.", "error");
@@ -631,6 +662,10 @@ export default function Tactics() {
 
     // 저장되었던 전술 라이브러리 상태 가져오기 (수정 모드로 전환)
     const handleLoadTactics = (tactics) => {
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false; // 전술 로드 시에는 자동 수정을 절대 트리거하지 않도록 차단!
+        setAutoSaveStatus('idle');
+        
         setSelectedFormation(tactics.formation);
         setSquad(tactics.squad || {});
         setBench(tactics.bench || {});
@@ -646,6 +681,8 @@ export default function Tactics() {
     // 저장 전술 데이터 삭제 (0ms 지연)
     const handleDeleteTactics = (tacticsId, e) => {
         e.stopPropagation();
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false;
         setConfirmModal({
             show: true,
             message: "이 전술 배치를 로컬 저장소에서 영구 삭제하시겠습니까?",
@@ -743,6 +780,9 @@ export default function Tactics() {
 
     // 신규: 포메이션 대형(좌표)만 로드 (선수 정보 squad는 그대로 보존, 수정 모드 전환)
     const handleLoadFormationOnly = (formItem) => {
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false; // 로드 시에는 자동 수정 트리거 방지
+        setAutoSaveStatus('idle');
         setPositions(formItem.positions || FORMATIONS['4-4-2']);
         setSelectedFormation('커스텀');
         setTacticsTitle(formItem.title);
@@ -753,6 +793,8 @@ export default function Tactics() {
     // 신규: 저장된 포메이션 단독 데이터 삭제 (0ms 지연)
     const handleDeleteFormationOnly = (formId, e) => {
         e.stopPropagation();
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        isDirtyRef.current = false;
         setConfirmModal({
             show: true,
             message: "이 포메이션 대형을 로컬 저장소에서 삭제하시겠습니까?",
@@ -784,6 +826,7 @@ export default function Tactics() {
             show: true,
             message: "현재 배치된 모든 주전, 벤치 후보 및 감독을 비우시겠습니까?",
             onConfirm: () => {
+                isDirtyRef.current = true; // 사용자의 직접 조작 감지
                 setSquad({});
                 setBench({});
                 setCoach(null);
@@ -824,7 +867,10 @@ export default function Tactics() {
                                     className="editor-input"
                                     placeholder="전술 / 포메이션명..."
                                     value={tacticsTitle}
-                                    onChange={(e) => setTacticsTitle(e.target.value)}
+                                    onChange={(e) => {
+                                        setTacticsTitle(e.target.value);
+                                        isDirtyRef.current = true; // 사용자의 텍스트 입력 조작 감지
+                                    }}
                                     title="저장할 타이틀 이름 입력"
                                     style={{ paddingRight: (editingTacticsId || editingFormationId) ? '2.2rem' : '0.8rem' }}
                                 />
@@ -1356,6 +1402,7 @@ export default function Tactics() {
                                                                         <button
                                                                             key={pos}
                                                                             onClick={() => {
+                                                                                isDirtyRef.current = true; // 사용자의 직접 조작 감지
                                                                                 setPositions(prev => prev.map(p => 
                                                                                     p.id === slot.id ? { ...p, role: pos } : p
                                                                                 ));
