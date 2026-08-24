@@ -72,7 +72,6 @@ public class PlayerAdapter extends BaseAdapter {
         String desc = p.descriptionKo.isEmpty() ? p.descriptionJa : p.descriptionKo;
         holder.tvDesc.setText(desc.replace("\n", " "));
 
-        // 속성별 컬러링
         if ("풍".equals(p.element) || "風".equals(p.element)) {
             holder.tvElement.setBackgroundColor(Color.parseColor("#0284C7"));
         } else if ("화".equals(p.element) || "火".equals(p.element)) {
@@ -85,7 +84,6 @@ public class PlayerAdapter extends BaseAdapter {
             holder.tvElement.setBackgroundColor(Color.parseColor("#475569"));
         }
 
-        // 포지션별 컬러링
         if ("GK".equalsIgnoreCase(p.position)) {
             holder.tvPos.setBackgroundColor(Color.parseColor("#EAB308"));
         } else if ("DF".equalsIgnoreCase(p.position)) {
@@ -96,9 +94,7 @@ public class PlayerAdapter extends BaseAdapter {
             holder.tvPos.setBackgroundColor(Color.parseColor("#EF4444"));
         }
 
-        // 이미지 비동기 로딩
         ImageLoader.getInstance().displayImage(p.image, holder.ivThumb);
-
         return convertView;
     }
 }

@@ -2,10 +2,9 @@
 <resources>
     <string name="app_name">이나즈마 스테이션</string>
     <string name="tab_players">선수 도감</string>
+    <string name="tab_tactics">전술판</string>
     <string name="tab_moves">필살기</string>
-    <string name="tab_info">정보</string>
+    <string name="tab_settings">설정</string>
     <string name="search_hint">선수 이름 / 속성 / 포지션 검색...</string>
-    <string name="btn_original_ja">🇯🇵 일어 원문 보기</string>
-    <string name="btn_translated_ko">🇰🇷 한국어 번역 보기</string>
-    <string name="back">뒤로</string>
+    <string name="search_moves_hint">필살기 이름 / 속성 / 타입 검색...</string>
 </resources>

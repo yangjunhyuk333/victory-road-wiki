@@ -1,156 +1,547 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <!-- 상단 네이티브 헤더 툴바 -->
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/tab_content_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#090D16"
-        android:padding="12dp">
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_nav_bar">
+
+        <!-- 1. 선수 도감 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_players"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡"
+                        android:textSize="22sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="이나즈마 스테이션"
+                        android:textColor="@color/gold_glow"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_player_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5,407명"
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="12sp"
+                        android:background="@drawable/bg_badge_generic"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_search"
+                    android:hint="@string/search_hint"
+                    android:textColorHint="@color/text_muted"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_filter_all"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="전체"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_btn_gold"
+                            android:layout_marginEnd="6dp"
+                            android:minWidth="48dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_wind"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🌪️ 풍(風)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_fire"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🔥 화(火)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_earth"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="⛰️ 산(山)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_wood"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🌲 림(林)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list_players"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="#1E293B"
+                android:dividerHeight="1dp"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:fastScrollEnabled="true" />
+        </LinearLayout>
+
+        <!-- 2. 전술판 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_tactics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📋 이나즈마 전술판"
+                        android:textColor="@color/gold_glow"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_save_tactics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="💾 저장"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:background="@drawable/bg_btn_gold"
+                        android:layout_marginEnd="6dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp" />
+
+                    <Button
+                        android:id="@+id/btn_reset_tactics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🔄 초기화"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:background="@drawable/bg_badge_generic"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp" />
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_form_442"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-4-2"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_btn_gold"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_433"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-3-3"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_352"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="3-5-2"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_4231"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-2-3-1"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_343"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="3-4-3"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/layout_pitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="380dp"
+                        android:background="@drawable/bg_pitch">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1.5dp"
+                            android:layout_centerVertical="true"
+                            android:background="#6034D399" />
+
+                        <View
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:layout_centerInParent="true"
+                            android:background="@drawable/bg_slot_empty" />
+
+                        <FrameLayout
+                            android:id="@+id/slots_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_card"
+                        android:padding="10dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🪑 후보 (벤치) 슬롯"
+                            android:textColor="@color/cyan_accent"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <LinearLayout
+                            android:id="@+id/bench_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+        <!-- 3. 필살기 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_moves"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ 필살기 도감"
+                    android:textColor="@color/gold_glow"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/et_search_moves"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_search"
+                    android:hint="@string/search_moves_hint"
+                    android:textColorHint="@color/text_muted"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list_moves"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#1E293B"
+                android:dividerHeight="1dp"
+                android:padding="8dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- 4. 설정 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_settings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_gold"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ 이나즈마 스테이션 v2.1.0 (Native)"
+                    android:textColor="@color/gold_glow"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 순수 안드로이드 네이티브 엔진 (WebView 의존성 0%)\n• 5,407명 전체 선수 100% 한국어 공식 도감 내장\n• 8대 포메이션 전술판 &amp; 스쿼드 메이커\n• 초고속 인메모리 페이징 무한 스크롤"
+                    android:textColor="@color/text_white"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginTop="10dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 바텀 네비게이션 바 -->
+    <LinearLayout
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_bottom_bar"
+        android:orientation="horizontal"
+        android:gravity="center">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:id="@+id/nav_btn_players"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚽"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_players"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="선수 도감"
+                android:textColor="@color/gold_glow"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_btn_tactics"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_tactics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전술판"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_btn_moves"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="⚡"
-                android:textSize="22sp"
-                android:layout_marginEnd="8dp" />
+                android:textSize="18sp" />
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="이나즈마 스테이션"
-                android:textColor="@color/gold_glow"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_player_count"
+                android:id="@+id/nav_tv_moves"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5,407명"
-                android:textColor="@color/cyan_accent"
-                android:textSize="12sp"
-                android:background="@drawable/bg_badge_generic"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="3dp"
-                android:paddingBottom="3dp" />
+                android:text="필살기"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- 네이티브 실시간 검색창 -->
-        <EditText
-            android:id="@+id/et_search"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_search"
-            android:hint="@string/search_hint"
-            android:textColorHint="@color/text_muted"
-            android:textColor="@color/text_white"
-            android:textSize="14sp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:singleLine="true"
-            android:imeOptions="actionSearch" />
+        <LinearLayout
+            android:id="@+id/nav_btn_settings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
 
-        <!-- 속성 필터 칩 (가로 스크롤) -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:text="⚙️"
+                android:textSize="18sp" />
 
-                <Button
-                    android:id="@+id/btn_filter_all"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="전체"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_btn_gold"
-                    android:layout_marginEnd="6dp"
-                    android:minWidth="48dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_wind"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🌪️ 풍(風)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_fire"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🔥 화(火)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_earth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="⛰️ 산(山)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_wood"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🌲 림(林)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-            </LinearLayout>
-        </HorizontalScrollView>
+            <TextView
+                android:id="@+id/nav_tv_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="설정"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
     </LinearLayout>
-
-    <!-- 초고속 네이티브 리스트뷰 -->
-    <ListView
-        android:id="@+id/list_players"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#1E293B"
-        android:dividerHeight="1dp"
-        android:padding="8dp"
-        android:clipToPadding="false"
-        android:scrollbars="vertical"
-        android:fastScrollEnabled="true" />
-
-</LinearLayout>
+</RelativeLayout>

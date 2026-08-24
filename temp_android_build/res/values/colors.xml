@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bg_dark">#0F172A</color>
+    <color name="bg_darker">#090D16</color>
     <color name="bg_card">#1E293B</color>
     <color name="bg_card_light">#334155</color>
     <color name="gold_primary">#F59E0B</color>
@@ -8,18 +9,6 @@
     <color name="cyan_accent">#06B6D4</color>
     <color name="text_white">#F8FAFC</color>
     <color name="text_muted">#94A3B8</color>
-    <color name="border_subtle">#334155</color>
-    
-    <!-- 속성 컬러 -->
-    <color name="elem_wind">#0284C7</color>
-    <color name="elem_fire">#E11D48</color>
-    <color name="elem_earth">#D97706</color>
-    <color name="elem_wood">#16A34A</color>
-    <color name="elem_void">#64748B</color>
-    
-    <!-- 포지션 컬러 -->
-    <color name="pos_gk">#EAB308</color>
-    <color name="pos_df">#3B82F6</color>
-    <color name="pos_mf">#10B981</color>
-    <color name="pos_fw">#EF4444</color>
+    <color name="pitch_green">#064E3B</color>
+    <color name="pitch_line">#34D399</color>
 </resources>

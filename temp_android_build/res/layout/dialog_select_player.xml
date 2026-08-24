@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="선수 배치 선택"
+        android:textColor="@color/gold_glow"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_dialog_search"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_search"
+        android:hint="선수 검색..."
+        android:textColorHint="@color/text_muted"
+        android:textColor="@color/text_white"
+        android:textSize="13sp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:singleLine="true" />
+
+    <ListView
+        android:id="@+id/list_dialog_players"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:divider="#1E293B"
+        android:dividerHeight="1dp" />
+
+    <Button
+        android:id="@+id/btn_dialog_clear_slot"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:text="❌ 이 슬롯 비우기"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_card" />
+</LinearLayout>

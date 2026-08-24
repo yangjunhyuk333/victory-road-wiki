@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <!-- 상단 뒤로가기 헤더 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
@@ -47,7 +46,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 1. 프로필 요약 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -123,7 +121,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 2. 인게임 프로필 설명 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -170,7 +167,6 @@
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
 
-            <!-- 3. 상세 스탯 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -198,7 +194,6 @@
                     android:lineSpacingExtra="3dp" />
             </LinearLayout>
 
-            <!-- 4. 소속 팀 및 시리즈 정보 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -226,8 +221,6 @@
                     android:textSize="12sp"
                     android:lineSpacingExtra="3dp" />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
-
 </LinearLayout>

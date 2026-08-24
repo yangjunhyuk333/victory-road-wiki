@@ -3,7 +3,7 @@
     <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/bg_dark</item>
         <item name="android:colorPrimary">@color/bg_dark</item>
-        <item name="android:colorPrimaryDark">#090D16</item>
+        <item name="android:colorPrimaryDark">@color/bg_darker</item>
         <item name="android:colorAccent">@color/gold_primary</item>
         <item name="android:textColorPrimary">@color/text_white</item>
         <item name="android:textColorSecondary">@color/text_muted</item>

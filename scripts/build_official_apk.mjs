@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-console.log('🚀 [1/6] 100% 안드로이드 순수 네이티브 APK 빌드 시작...');
+console.log('🚀 [1/6] 네이티브 앱 (전술판 + 페이징 + 바텀 네비) 정식 APK 빌드 시작...');
 
 const JBR_BIN = 'C:\\Program Files\\Android\\Android Studio\\jbr\\bin';
 const JAVAC = path.join(JBR_BIN, 'javac.exe');
@@ -12,9 +12,9 @@ const JAVA = path.join(JBR_BIN, 'java.exe');
 const SDK_DIR = 'C:\\Users\\cucun\\AppData\\Local\\Android\\Sdk';
 const BUILD_TOOLS = path.join(SDK_DIR, 'build-tools', '36.0.0');
 const AAPT2 = path.join(BUILD_TOOLS, 'aapt2.exe');
-const D8 = path.join(BUILD_TOOLS, 'd8.bat');
+const D8_JAR = path.join(BUILD_TOOLS, 'lib', 'd8.jar');
 const ZIPALIGN = path.join(BUILD_TOOLS, 'zipalign.exe');
-const APKSIGNER = path.join(BUILD_TOOLS, 'apksigner.bat');
+const APKSIGNER_JAR = path.join(BUILD_TOOLS, 'lib', 'apksigner.jar');
 const ANDROID_JAR = path.join(SDK_DIR, 'platforms\\android-36.1\\android.jar');
 
 const WORK_DIR = path.resolve('temp_android_build');
@@ -41,13 +41,13 @@ fs.mkdirSync(binDir, { recursive: true });
 fs.mkdirSync(objDir, { recursive: true });
 
 // ==========================================
-// 1. AndroidManifest.xml (멀티 액티비티 네이티브 앱)
+// 1. AndroidManifest.xml
 // ==========================================
 const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.inazumastation.app"
-    android:versionCode="2"
-    android:versionName="2.0.0">
+    android:versionCode="3"
+    android:versionName="2.1.0">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -82,24 +82,24 @@ const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
 fs.writeFileSync(path.join(WORK_DIR, 'AndroidManifest.xml'), manifestContent, 'utf8');
 
 // ==========================================
-// 2. XML Values & Styles & Colors
+// 2. XML Values & Colors & Styles
 // ==========================================
 const stringsXml = `<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">이나즈마 스테이션</string>
     <string name="tab_players">선수 도감</string>
+    <string name="tab_tactics">전술판</string>
     <string name="tab_moves">필살기</string>
-    <string name="tab_info">정보</string>
+    <string name="tab_settings">설정</string>
     <string name="search_hint">선수 이름 / 속성 / 포지션 검색...</string>
-    <string name="btn_original_ja">🇯🇵 일어 원문 보기</string>
-    <string name="btn_translated_ko">🇰🇷 한국어 번역 보기</string>
-    <string name="back">뒤로</string>
+    <string name="search_moves_hint">필살기 이름 / 속성 / 타입 검색...</string>
 </resources>`;
 fs.writeFileSync(path.join(resValues, 'strings.xml'), stringsXml, 'utf8');
 
 const colorsXml = `<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="bg_dark">#0F172A</color>
+    <color name="bg_darker">#090D16</color>
     <color name="bg_card">#1E293B</color>
     <color name="bg_card_light">#334155</color>
     <color name="gold_primary">#F59E0B</color>
@@ -107,20 +107,8 @@ const colorsXml = `<?xml version="1.0" encoding="utf-8"?>
     <color name="cyan_accent">#06B6D4</color>
     <color name="text_white">#F8FAFC</color>
     <color name="text_muted">#94A3B8</color>
-    <color name="border_subtle">#334155</color>
-    
-    <!-- 속성 컬러 -->
-    <color name="elem_wind">#0284C7</color>
-    <color name="elem_fire">#E11D48</color>
-    <color name="elem_earth">#D97706</color>
-    <color name="elem_wood">#16A34A</color>
-    <color name="elem_void">#64748B</color>
-    
-    <!-- 포지션 컬러 -->
-    <color name="pos_gk">#EAB308</color>
-    <color name="pos_df">#3B82F6</color>
-    <color name="pos_mf">#10B981</color>
-    <color name="pos_fw">#EF4444</color>
+    <color name="pitch_green">#064E3B</color>
+    <color name="pitch_line">#34D399</color>
 </resources>`;
 fs.writeFileSync(path.join(resValues, 'colors.xml'), colorsXml, 'utf8');
 
@@ -129,7 +117,7 @@ const stylesXml = `<?xml version="1.0" encoding="utf-8"?>
     <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/bg_dark</item>
         <item name="android:colorPrimary">@color/bg_dark</item>
-        <item name="android:colorPrimaryDark">#090D16</item>
+        <item name="android:colorPrimaryDark">@color/bg_darker</item>
         <item name="android:colorAccent">@color/gold_primary</item>
         <item name="android:textColorPrimary">@color/text_white</item>
         <item name="android:textColorSecondary">@color/text_muted</item>
@@ -143,22 +131,36 @@ fs.writeFileSync(path.join(resValues, 'styles.xml'), stylesXml, 'utf8');
 fs.writeFileSync(path.join(resDrawable, 'bg_card.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="#1E293B" />
-    <corners android:radius="14dp" />
+    <corners android:radius="12dp" />
     <stroke android:width="1dp" android:color="#334155" />
 </shape>`, 'utf8');
 
 fs.writeFileSync(path.join(resDrawable, 'bg_card_gold.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="#1E293B" />
-    <corners android:radius="14dp" />
+    <corners android:radius="12dp" />
     <stroke android:width="1.5dp" android:color="#F59E0B" />
 </shape>`, 'utf8');
 
-fs.writeFileSync(path.join(resDrawable, 'bg_search.xml'), `<?xml version="1.0" encoding="utf-8"?>
+fs.writeFileSync(path.join(resDrawable, 'bg_pitch.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#1E293B" />
-    <corners android:radius="10dp" />
-    <stroke android:width="1dp" android:color="#475569" />
+    <solid android:color="#064E3B" />
+    <corners android:radius="14dp" />
+    <stroke android:width="2dp" android:color="#10B981" />
+</shape>`, 'utf8');
+
+fs.writeFileSync(path.join(resDrawable, 'bg_slot_player.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#E20F172A" />
+    <corners android:radius="24dp" />
+    <stroke android:width="1.5dp" android:color="#F59E0B" />
+</shape>`, 'utf8');
+
+fs.writeFileSync(path.join(resDrawable, 'bg_slot_empty.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#800F172A" />
+    <corners android:radius="24dp" />
+    <stroke android:width="1dp" android:color="#64748B" />
 </shape>`, 'utf8');
 
 fs.writeFileSync(path.join(resDrawable, 'bg_badge_generic.xml'), `<?xml version="1.0" encoding="utf-8"?>
@@ -173,171 +175,25 @@ fs.writeFileSync(path.join(resDrawable, 'bg_btn_gold.xml'), `<?xml version="1.0"
     <corners android:radius="8dp" />
 </shape>`, 'utf8');
 
+fs.writeFileSync(path.join(resDrawable, 'bg_search.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#1E293B" />
+    <corners android:radius="10dp" />
+    <stroke android:width="1dp" android:color="#475569" />
+</shape>`, 'utf8');
+
+fs.writeFileSync(path.join(resDrawable, 'bg_bottom_bar.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#090D16" />
+    <stroke android:width="1dp" android:color="#1E293B" />
+</shape>`, 'utf8');
+
 // ==========================================
 // 4. XML Layouts
 // ==========================================
 
-// activity_main.xml
-const activityMainXml = `<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/bg_dark">
-
-    <!-- 상단 네이티브 헤더 툴바 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#090D16"
-        android:padding="12dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚡"
-                android:textSize="22sp"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="이나즈마 스테이션"
-                android:textColor="@color/gold_glow"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_player_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="5,407명"
-                android:textColor="@color/cyan_accent"
-                android:textSize="12sp"
-                android:background="@drawable/bg_badge_generic"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="3dp"
-                android:paddingBottom="3dp" />
-        </LinearLayout>
-
-        <!-- 네이티브 실시간 검색창 -->
-        <EditText
-            android:id="@+id/et_search"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_search"
-            android:hint="@string/search_hint"
-            android:textColorHint="@color/text_muted"
-            android:textColor="@color/text_white"
-            android:textSize="14sp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:singleLine="true"
-            android:imeOptions="actionSearch" />
-
-        <!-- 속성 필터 칩 (가로 스크롤) -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_filter_all"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="전체"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_btn_gold"
-                    android:layout_marginEnd="6dp"
-                    android:minWidth="48dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_wind"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🌪️ 풍(風)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_fire"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🔥 화(火)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_earth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="⛰️ 산(山)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:layout_marginEnd="6dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-
-                <Button
-                    android:id="@+id/btn_filter_wood"
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:text="🌲 림(林)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:background="@drawable/bg_badge_generic"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp" />
-            </LinearLayout>
-        </HorizontalScrollView>
-    </LinearLayout>
-
-    <!-- 초고속 네이티브 리스트뷰 -->
-    <ListView
-        android:id="@+id/list_players"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#1E293B"
-        android:dividerHeight="1dp"
-        android:padding="8dp"
-        android:clipToPadding="false"
-        android:scrollbars="vertical"
-        android:fastScrollEnabled="true" />
-
-</LinearLayout>`;
-fs.writeFileSync(path.join(resLayout, 'activity_main.xml'), activityMainXml, 'utf8');
-
 // item_player.xml
-const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
+fs.writeFileSync(path.join(resLayout, 'item_player.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -347,7 +203,6 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
     android:layout_marginBottom="6dp"
     android:gravity="center_vertical">
 
-    <!-- 선수 이미지 -->
     <ImageView
         android:id="@+id/iv_player_thumb"
         android:layout_width="52dp"
@@ -356,7 +211,6 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
         android:scaleType="fitCenter"
         android:layout_marginEnd="12dp" />
 
-    <!-- 선수 정보 영역 -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -380,7 +234,6 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
                 android:textStyle="bold"
                 android:singleLine="true" />
 
-            <!-- 포지션 뱃지 -->
             <TextView
                 android:id="@+id/tv_player_pos"
                 android:layout_width="wrap_content"
@@ -396,7 +249,6 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
                 android:paddingBottom="2dp"
                 android:layout_marginEnd="4dp" />
 
-            <!-- 속성 뱃지 -->
             <TextView
                 android:id="@+id/tv_player_element"
                 android:layout_width="wrap_content"
@@ -412,7 +264,6 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
                 android:paddingBottom="2dp" />
         </LinearLayout>
 
-        <!-- 시리즈 및 설명 프리뷰 -->
         <TextView
             android:id="@+id/tv_player_series"
             android:layout_width="match_parent"
@@ -433,19 +284,67 @@ const itemPlayerXml = `<?xml version="1.0" encoding="utf-8"?>
             android:layout_marginTop="2dp"
             android:singleLine="true" />
     </LinearLayout>
+</LinearLayout>`, 'utf8');
 
-</LinearLayout>`;
-fs.writeFileSync(path.join(resLayout, 'item_player.xml'), itemPlayerXml, 'utf8');
+// dialog_select_player.xml
+fs.writeFileSync(path.join(resLayout, 'dialog_select_player.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="선수 배치 선택"
+        android:textColor="@color/gold_glow"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_dialog_search"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_search"
+        android:hint="선수 검색..."
+        android:textColorHint="@color/text_muted"
+        android:textColor="@color/text_white"
+        android:textSize="13sp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:singleLine="true" />
+
+    <ListView
+        android:id="@+id/list_dialog_players"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:divider="#1E293B"
+        android:dividerHeight="1dp" />
+
+    <Button
+        android:id="@+id/btn_dialog_clear_slot"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:text="❌ 이 슬롯 비우기"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_card" />
+</LinearLayout>`, 'utf8');
 
 // activity_player_detail.xml
-const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
+fs.writeFileSync(path.join(resLayout, 'activity_player_detail.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <!-- 상단 뒤로가기 헤더 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
@@ -487,7 +386,6 @@ const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 1. 프로필 요약 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -563,7 +461,6 @@ const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 2. 인게임 프로필 설명 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -610,7 +507,6 @@ const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
                     android:lineSpacingExtra="4dp" />
             </LinearLayout>
 
-            <!-- 3. 상세 스탯 카드 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -638,7 +534,6 @@ const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
                     android:lineSpacingExtra="3dp" />
             </LinearLayout>
 
-            <!-- 4. 소속 팀 및 시리즈 정보 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -666,19 +561,565 @@ const activityPlayerDetailXml = `<?xml version="1.0" encoding="utf-8"?>
                     android:textSize="12sp"
                     android:lineSpacingExtra="3dp" />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
+</LinearLayout>`, 'utf8');
 
-</LinearLayout>`;
-fs.writeFileSync(path.join(resLayout, 'activity_player_detail.xml'), activityPlayerDetailXml, 'utf8');
+// activity_main.xml (4개 탭 레이아웃 및 바텀 네비게이션)
+fs.writeFileSync(path.join(resLayout, 'activity_main.xml'), `<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <FrameLayout
+        android:id="@+id/tab_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_nav_bar">
+
+        <!-- 1. 선수 도감 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_players"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡"
+                        android:textSize="22sp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="이나즈마 스테이션"
+                        android:textColor="@color/gold_glow"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_player_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5,407명"
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="12sp"
+                        android:background="@drawable/bg_badge_generic"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_search"
+                    android:hint="@string/search_hint"
+                    android:textColorHint="@color/text_muted"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_filter_all"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="전체"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_btn_gold"
+                            android:layout_marginEnd="6dp"
+                            android:minWidth="48dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_wind"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🌪️ 풍(風)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_fire"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🔥 화(火)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_earth"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="⛰️ 산(山)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="6dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+
+                        <Button
+                            android:id="@+id/btn_filter_wood"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="🌲 림(林)"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list_players"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="#1E293B"
+                android:dividerHeight="1dp"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:fastScrollEnabled="true" />
+        </LinearLayout>
+
+        <!-- 2. 전술판 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_tactics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📋 이나즈마 전술판"
+                        android:textColor="@color/gold_glow"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_save_tactics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="💾 저장"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:background="@drawable/bg_btn_gold"
+                        android:layout_marginEnd="6dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp" />
+
+                    <Button
+                        android:id="@+id/btn_reset_tactics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="🔄 초기화"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:background="@drawable/bg_badge_generic"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp" />
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_form_442"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-4-2"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_btn_gold"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_433"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-3-3"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_352"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="3-5-2"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_4231"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="4-2-3-1"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:layout_marginEnd="4dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+
+                        <Button
+                            android:id="@+id/btn_form_343"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="3-4-3"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:background="@drawable/bg_badge_generic"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="8dp" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/layout_pitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="380dp"
+                        android:background="@drawable/bg_pitch">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1.5dp"
+                            android:layout_centerVertical="true"
+                            android:background="#6034D399" />
+
+                        <View
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:layout_centerInParent="true"
+                            android:background="@drawable/bg_slot_empty" />
+
+                        <FrameLayout
+                            android:id="@+id/slots_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_card"
+                        android:padding="10dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🪑 후보 (벤치) 슬롯"
+                            android:textColor="@color/cyan_accent"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <LinearLayout
+                            android:id="@+id/bench_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+        <!-- 3. 필살기 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_moves"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#090D16"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ 필살기 도감"
+                    android:textColor="@color/gold_glow"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/et_search_moves"
+                    android:layout_width="match_parent"
+                    android:layout_height="42dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_search"
+                    android:hint="@string/search_moves_hint"
+                    android:textColorHint="@color/text_muted"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/list_moves"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#1E293B"
+                android:dividerHeight="1dp"
+                android:padding="8dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- 4. 설정 탭 -->
+        <LinearLayout
+            android:id="@+id/tab_view_settings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card_gold"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡ 이나즈마 스테이션 v2.1.0 (Native)"
+                    android:textColor="@color/gold_glow"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 순수 안드로이드 네이티브 엔진 (WebView 의존성 0%)\\n• 5,407명 전체 선수 100% 한국어 공식 도감 내장\\n• 8대 포메이션 전술판 &amp; 스쿼드 메이커\\n• 초고속 인메모리 페이징 무한 스크롤"
+                    android:textColor="@color/text_white"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginTop="10dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 바텀 네비게이션 바 -->
+    <LinearLayout
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_bottom_bar"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/nav_btn_players"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚽"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_players"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="선수 도감"
+                android:textColor="@color/gold_glow"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_btn_tactics"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_tactics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전술판"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_btn_moves"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_moves"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="필살기"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_btn_settings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/nav_tv_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="설정"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>`, 'utf8');
 
 // ==========================================
-// 5. Java 소스 코드 (안드로이드 순수 네이티브)
+// 5. Java 소스 코드 100% 정의
 // ==========================================
 
-// ImageLoader.java (비동기 이미지 다운로더 + 인메모리 LruCache)
-const imageLoaderJava = `package com.inazumastation.app;
+// ImageLoader.java
+fs.writeFileSync(path.join(srcDir, 'ImageLoader.java'), `package com.inazumastation.app;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -757,11 +1198,10 @@ public class ImageLoader {
             }
         });
     }
-}`;
-fs.writeFileSync(path.join(srcDir, 'ImageLoader.java'), imageLoaderJava, 'utf8');
+}`, 'utf8');
 
 // PlayerData.java
-const playerDataJava = `package com.inazumastation.app;
+fs.writeFileSync(path.join(srcDir, 'PlayerData.java'), `package com.inazumastation.app;
 
 import org.json.JSONObject;
 
@@ -777,7 +1217,6 @@ public class PlayerData {
     public String descriptionKo = "";
     public String descriptionJa = "";
     public String statsText = "";
-    public String teamsText = "";
 
     public static PlayerData fromJson(JSONObject obj) {
         PlayerData p = new PlayerData();
@@ -804,11 +1243,29 @@ public class PlayerData {
         }
         return p;
     }
-}`;
-fs.writeFileSync(path.join(srcDir, 'PlayerData.java'), playerDataJava, 'utf8');
+}`, 'utf8');
+
+// MoveData.java
+fs.writeFileSync(path.join(srcDir, 'MoveData.java'), `package com.inazumastation.app;
+
+public class MoveData {
+    public String name = "";
+    public String element = "";
+    public String type = "";
+    public String cost = "";
+    public String power = "";
+
+    public MoveData(String name, String element, String type, String cost, String power) {
+        this.name = name;
+        this.element = element;
+        this.type = type;
+        this.cost = cost;
+        this.power = power;
+    }
+}`, 'utf8');
 
 // PlayerAdapter.java
-const playerAdapterJava = `package com.inazumastation.app;
+fs.writeFileSync(path.join(srcDir, 'PlayerAdapter.java'), `package com.inazumastation.app;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -882,7 +1339,6 @@ public class PlayerAdapter extends BaseAdapter {
         String desc = p.descriptionKo.isEmpty() ? p.descriptionJa : p.descriptionKo;
         holder.tvDesc.setText(desc.replace("\\n", " "));
 
-        // 속성별 컬러링
         if ("풍".equals(p.element) || "風".equals(p.element)) {
             holder.tvElement.setBackgroundColor(Color.parseColor("#0284C7"));
         } else if ("화".equals(p.element) || "火".equals(p.element)) {
@@ -895,7 +1351,6 @@ public class PlayerAdapter extends BaseAdapter {
             holder.tvElement.setBackgroundColor(Color.parseColor("#475569"));
         }
 
-        // 포지션별 컬러링
         if ("GK".equalsIgnoreCase(p.position)) {
             holder.tvPos.setBackgroundColor(Color.parseColor("#EAB308"));
         } else if ("DF".equalsIgnoreCase(p.position)) {
@@ -906,152 +1361,13 @@ public class PlayerAdapter extends BaseAdapter {
             holder.tvPos.setBackgroundColor(Color.parseColor("#EF4444"));
         }
 
-        // 이미지 비동기 로딩
         ImageLoader.getInstance().displayImage(p.image, holder.ivThumb);
-
         return convertView;
     }
-}`;
-fs.writeFileSync(path.join(srcDir, 'PlayerAdapter.java'), playerAdapterJava, 'utf8');
-
-// MainActivity.java
-const mainActivityJava = `package com.inazumastation.app;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends Activity {
-    public static List<PlayerData> allPlayers = new ArrayList<PlayerData>();
-    private List<PlayerData> filteredPlayers = new ArrayList<PlayerData>();
-    private PlayerAdapter adapter;
-    private ListView listView;
-    private EditText etSearch;
-    private TextView tvCount;
-    private String currentElementFilter = "";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        listView = (ListView) findViewById(R.id.list_players);
-        etSearch = (EditText) findViewById(R.id.et_search);
-        tvCount = (TextView) findViewById(R.id.tv_player_count);
-
-        loadPlayersData();
-
-        adapter = new PlayerAdapter(this, filteredPlayers);
-        listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                PlayerData selected = filteredPlayers.get(position);
-                Intent intent = new Intent(MainActivity.this, PlayerDetailActivity.class);
-                intent.putExtra("player_id", selected.id);
-                startActivity(intent);
-            }
-        });
-
-        // 실시간 검색
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applyFilter();
-            }
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        // 속성 필터 버튼 리스너
-        findViewById(R.id.btn_filter_all).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { currentElementFilter = ""; applyFilter(); }
-        });
-        findViewById(R.id.btn_filter_wind).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { currentElementFilter = "풍"; applyFilter(); }
-        });
-        findViewById(R.id.btn_filter_fire).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { currentElementFilter = "화"; applyFilter(); }
-        });
-        findViewById(R.id.btn_filter_earth).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { currentElementFilter = "산"; applyFilter(); }
-        });
-        findViewById(R.id.btn_filter_wood).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { currentElementFilter = "림"; applyFilter(); }
-        });
-    }
-
-    private void loadPlayersData() {
-        if (!allPlayers.isEmpty()) {
-            filteredPlayers.addAll(allPlayers);
-            return;
-        }
-
-        try {
-            InputStream is = getAssets().open("characters.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            String json = new String(buffer, StandardCharsets.UTF_8);
-
-            JSONArray array = new JSONArray(json);
-            for (int i = 0; i < array.length(); i++) {
-                allPlayers.add(PlayerData.fromJson(array.getJSONObject(i)));
-            }
-            filteredPlayers.addAll(allPlayers);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void applyFilter() {
-        String query = etSearch.getText().toString().trim().toLowerCase();
-        filteredPlayers.clear();
-
-        for (PlayerData p : allPlayers) {
-            boolean matchElem = currentElementFilter.isEmpty() || p.element.contains(currentElementFilter);
-            boolean matchQuery = query.isEmpty() || 
-                                 p.name.toLowerCase().contains(query) || 
-                                 p.kana.toLowerCase().contains(query) || 
-                                 p.position.toLowerCase().contains(query) ||
-                                 p.series.toLowerCase().contains(query);
-
-            if (matchElem && matchQuery) {
-                filteredPlayers.add(p);
-            }
-        }
-        tvCount.setText(filteredPlayers.size() + "명");
-        adapter.notifyDataSetChanged();
-    }
-}`;
-fs.writeFileSync(path.join(srcDir, 'MainActivity.java'), mainActivityJava, 'utf8');
+}`, 'utf8');
 
 // PlayerDetailActivity.java
-const playerDetailActivityJava = `package com.inazumastation.app;
+fs.writeFileSync(path.join(srcDir, 'PlayerDetailActivity.java'), `package com.inazumastation.app;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -1135,8 +1451,494 @@ public class PlayerDetailActivity extends Activity {
             btnToggleLang.setText("🇯🇵 일어 원문");
         }
     }
-}`;
-fs.writeFileSync(path.join(srcDir, 'PlayerDetailActivity.java'), playerDetailActivityJava, 'utf8');
+}`, 'utf8');
+
+// MainActivity.java
+fs.writeFileSync(path.join(srcDir, 'MainActivity.java'), `package com.inazumastation.app;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MainActivity extends Activity {
+    public static List<PlayerData> allPlayers = new ArrayList<PlayerData>();
+    private List<PlayerData> filteredPlayers = new ArrayList<PlayerData>();
+    private List<PlayerData> pagedPlayers = new ArrayList<PlayerData>();
+    
+    private PlayerAdapter playerAdapter;
+    private ListView listView;
+    private EditText etSearch;
+    private TextView tvCount;
+    private String currentElementFilter = "";
+
+    // 페이징 상수 (한 번에 50명씩 로드)
+    private static final int PAGE_SIZE = 50;
+    private int currentPage = 1;
+    private boolean isLoadingMore = false;
+
+    // 4개 탭 뷰
+    private View tabPlayersView, tabTacticsView, tabMovesView, tabSettingsView;
+    private TextView navTvPlayers, navTvTactics, navTvMoves, navTvSettings;
+
+    // 전술판 상태
+    private String currentFormation = "4-4-2";
+    private FrameLayout pitchSlotsContainer;
+    private LinearLayout benchContainer;
+    private PlayerData[] startingEleven = new PlayerData[11];
+    private PlayerData[] benchSlots = new PlayerData[5];
+
+    // 포메이션별 좌표 정의 (top%, left%)
+    private static final Map<String, int[][]> FORMATION_COORDS = new HashMap<String, int[][]>();
+    static {
+        FORMATION_COORDS.put("4-4-2", new int[][]{
+            {86, 50}, {70, 15}, {72, 35}, {72, 65}, {70, 85},
+            {46, 15}, {48, 36}, {48, 64}, {46, 85}, {18, 35}, {18, 65}
+        });
+        FORMATION_COORDS.put("4-3-3", new int[][]{
+            {86, 50}, {70, 15}, {72, 35}, {72, 65}, {70, 85},
+            {48, 30}, {52, 50}, {48, 70}, {20, 20}, {16, 50}, {20, 80}
+        });
+        FORMATION_COORDS.put("3-5-2", new int[][]{
+            {86, 50}, {72, 25}, {74, 50}, {72, 75}, {50, 15},
+            {54, 35}, {54, 65}, {50, 85}, {36, 50}, {18, 35}, {18, 65}
+        });
+        FORMATION_COORDS.put("4-2-3-1", new int[][]{
+            {86, 50}, {70, 15}, {73, 35}, {73, 65}, {70, 85},
+            {55, 35}, {55, 65}, {35, 18}, {35, 50}, {35, 82}, {16, 50}
+        });
+        FORMATION_COORDS.put("3-4-3", new int[][]{
+            {86, 50}, {72, 25}, {74, 50}, {72, 75}, {48, 15},
+            {48, 38}, {48, 62}, {48, 85}, {20, 25}, {16, 50}, {20, 75}
+        });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        initViews();
+        loadDatabaseAsync();
+        setupBottomNav();
+        setupTacticsBoard();
+    }
+
+    private void initViews() {
+        tabPlayersView = findViewById(R.id.tab_view_players);
+        tabTacticsView = findViewById(R.id.tab_view_tactics);
+        tabMovesView = findViewById(R.id.tab_view_moves);
+        tabSettingsView = findViewById(R.id.tab_view_settings);
+
+        navTvPlayers = (TextView) findViewById(R.id.nav_tv_players);
+        navTvTactics = (TextView) findViewById(R.id.nav_tv_tactics);
+        navTvMoves = (TextView) findViewById(R.id.nav_tv_moves);
+        navTvSettings = (TextView) findViewById(R.id.nav_tv_settings);
+
+        listView = (ListView) findViewById(R.id.list_players);
+        etSearch = (EditText) findViewById(R.id.et_search);
+        tvCount = (TextView) findViewById(R.id.tv_player_count);
+
+        playerAdapter = new PlayerAdapter(this, pagedPlayers);
+        listView.setAdapter(playerAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position < pagedPlayers.size()) {
+                    PlayerData selected = pagedPlayers.get(position);
+                    Intent intent = new Intent(MainActivity.this, PlayerDetailActivity.class);
+                    intent.putExtra("player_id", selected.id);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        // 50개 단위 무한 스크롤 (Paging)
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {}
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (totalItemCount > 0 && (firstVisibleItem + visibleItemCount >= totalItemCount - 5)) {
+                    loadNextPage();
+                }
+            }
+        });
+
+        // 실시간 검색창 이벤트
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFilter();
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        findViewById(R.id.btn_filter_all).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentElementFilter = ""; applyFilter(); }
+        });
+        findViewById(R.id.btn_filter_wind).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentElementFilter = "풍"; applyFilter(); }
+        });
+        findViewById(R.id.btn_filter_fire).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentElementFilter = "화"; applyFilter(); }
+        });
+        findViewById(R.id.btn_filter_earth).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentElementFilter = "산"; applyFilter(); }
+        });
+        findViewById(R.id.btn_filter_wood).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentElementFilter = "림"; applyFilter(); }
+        });
+    }
+
+    private void loadDatabaseAsync() {
+        if (!allPlayers.isEmpty()) {
+            applyFilter();
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    InputStream is = getAssets().open("characters.json");
+                    int size = is.available();
+                    byte[] buffer = new byte[size];
+                    is.read(buffer);
+                    is.close();
+                    String json = new String(buffer, StandardCharsets.UTF_8);
+
+                    JSONArray array = new JSONArray(json);
+                    final List<PlayerData> list = new ArrayList<PlayerData>();
+                    for (int i = 0; i < array.length(); i++) {
+                        list.add(PlayerData.fromJson(array.getJSONObject(i)));
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            allPlayers.clear();
+                            allPlayers.addAll(list);
+                            applyFilter();
+                            loadSavedTactics();
+                            renderPitchSlots();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void applyFilter() {
+        String query = etSearch.getText().toString().trim().toLowerCase();
+        filteredPlayers.clear();
+
+        for (PlayerData p : allPlayers) {
+            boolean matchElem = currentElementFilter.isEmpty() || p.element.contains(currentElementFilter);
+            boolean matchQuery = query.isEmpty() || 
+                                 p.name.toLowerCase().contains(query) || 
+                                 p.kana.toLowerCase().contains(query) || 
+                                 p.position.toLowerCase().contains(query) ||
+                                 p.series.toLowerCase().contains(query);
+
+            if (matchElem && matchQuery) {
+                filteredPlayers.add(p);
+            }
+        }
+
+        tvCount.setText(filteredPlayers.size() + "명");
+        currentPage = 1;
+        pagedPlayers.clear();
+        loadNextPage();
+    }
+
+    private void loadNextPage() {
+        if (isLoadingMore) return;
+        int start = (currentPage - 1) * PAGE_SIZE;
+        if (start >= filteredPlayers.size() && !pagedPlayers.isEmpty()) return;
+
+        isLoadingMore = true;
+        int end = Math.min(start + PAGE_SIZE, filteredPlayers.size());
+        for (int i = start; i < end; i++) {
+            pagedPlayers.add(filteredPlayers.get(i));
+        }
+        currentPage++;
+        playerAdapter.notifyDataSetChanged();
+        isLoadingMore = false;
+    }
+
+    private void setupBottomNav() {
+        findViewById(R.id.nav_btn_players).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { selectTab(0); }
+        });
+        findViewById(R.id.nav_btn_tactics).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { selectTab(1); }
+        });
+        findViewById(R.id.nav_btn_moves).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { selectTab(2); }
+        });
+        findViewById(R.id.nav_btn_settings).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { selectTab(3); }
+        });
+    }
+
+    private void selectTab(int index) {
+        tabPlayersView.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        tabTacticsView.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        tabMovesView.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        tabSettingsView.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+
+        navTvPlayers.setTextColor(index == 0 ? Color.parseColor("#FBBF24") : Color.parseColor("#94A3B8"));
+        navTvTactics.setTextColor(index == 1 ? Color.parseColor("#FBBF24") : Color.parseColor("#94A3B8"));
+        navTvMoves.setTextColor(index == 2 ? Color.parseColor("#FBBF24") : Color.parseColor("#94A3B8"));
+        navTvSettings.setTextColor(index == 3 ? Color.parseColor("#FBBF24") : Color.parseColor("#94A3B8"));
+
+        if (index == 1) {
+            renderPitchSlots();
+        }
+    }
+
+    private void setupTacticsBoard() {
+        pitchSlotsContainer = (FrameLayout) findViewById(R.id.slots_container);
+        benchContainer = (LinearLayout) findViewById(R.id.bench_container);
+
+        findViewById(R.id.btn_form_442).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentFormation = "4-4-2"; renderPitchSlots(); }
+        });
+        findViewById(R.id.btn_form_433).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentFormation = "4-3-3"; renderPitchSlots(); }
+        });
+        findViewById(R.id.btn_form_352).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentFormation = "3-5-2"; renderPitchSlots(); }
+        });
+        findViewById(R.id.btn_form_4231).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentFormation = "4-2-3-1"; renderPitchSlots(); }
+        });
+        findViewById(R.id.btn_form_343).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { currentFormation = "3-4-3"; renderPitchSlots(); }
+        });
+
+        findViewById(R.id.btn_save_tactics).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { saveTactics(); }
+        });
+        findViewById(R.id.btn_reset_tactics).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { resetTactics(); }
+        });
+    }
+
+    private void renderPitchSlots() {
+        if (pitchSlotsContainer == null) return;
+        pitchSlotsContainer.removeAllViews();
+
+        int[][] coords = FORMATION_COORDS.get(currentFormation);
+        if (coords == null) coords = FORMATION_COORDS.get("4-4-2");
+
+        for (int i = 0; i < 11; i++) {
+            final int slotIndex = i;
+            int topPercent = coords[i][0];
+            int leftPercent = coords[i][1];
+
+            LinearLayout slotView = createSlotView(startingEleven[i], slotIndex, false);
+
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                dpToPx(56), dpToPx(56)
+            );
+            params.gravity = Gravity.TOP | Gravity.LEFT;
+            params.topMargin = (int) (dpToPx(380) * (topPercent / 100.0f) - dpToPx(28));
+            params.leftMargin = (int) (getResources().getDisplayMetrics().widthPixels * (leftPercent / 100.0f) - dpToPx(34));
+
+            pitchSlotsContainer.addView(slotView, params);
+        }
+
+        if (benchContainer != null) {
+            benchContainer.removeAllViews();
+            for (int i = 0; i < 5; i++) {
+                final int benchIndex = i;
+                LinearLayout benchSlotView = createSlotView(benchSlots[i], benchIndex, true);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dpToPx(56), dpToPx(56));
+                lp.setMargins(dpToPx(4), 0, dpToPx(4), 0);
+                benchContainer.addView(benchSlotView, lp);
+            }
+        }
+    }
+
+    private LinearLayout createSlotView(final PlayerData player, final int index, final boolean isBench) {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setGravity(Gravity.CENTER);
+        layout.setBackgroundResource(player != null ? R.drawable.bg_slot_player : R.drawable.bg_slot_empty);
+        layout.setClickable(true);
+
+        ImageView iv = new ImageView(this);
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(dpToPx(32), dpToPx(32));
+        iv.setLayoutParams(ivParams);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        TextView tv = new TextView(this);
+        tv.setTextSize(9);
+        tv.setTextColor(Color.WHITE);
+        tv.setSingleLine(true);
+        tv.setGravity(Gravity.CENTER);
+
+        if (player != null) {
+            ImageLoader.getInstance().displayImage(player.image, iv);
+            tv.setText(player.name);
+        } else {
+            tv.setText(isBench ? "후보 " + (index + 1) : (index == 0 ? "GK" : "선수 " + (index + 1)));
+            tv.setTextColor(Color.parseColor("#94A3B8"));
+        }
+
+        layout.addView(iv);
+        layout.addView(tv);
+
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openPlayerSelectDialog(index, isBench);
+            }
+        });
+
+        return layout;
+    }
+
+    private void openPlayerSelectDialog(final int slotIndex, final boolean isBench) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_select_player);
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(520));
+
+        TextView tvTitle = (TextView) dialog.findViewById(R.id.tv_dialog_title);
+        tvTitle.setText((isBench ? "후보 " + (slotIndex + 1) : "선발 슬롯 " + (slotIndex + 1)) + " 선수 선택");
+
+        EditText etDialogSearch = (EditText) dialog.findViewById(R.id.et_dialog_search);
+        ListView listDialog = (ListView) dialog.findViewById(R.id.list_dialog_players);
+
+        final List<PlayerData> dialogFiltered = new ArrayList<PlayerData>(allPlayers);
+        final PlayerAdapter dialogAdapter = new PlayerAdapter(this, dialogFiltered);
+        listDialog.setAdapter(dialogAdapter);
+
+        etDialogSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String q = s.toString().trim().toLowerCase();
+                dialogFiltered.clear();
+                for (PlayerData p : allPlayers) {
+                    if (q.isEmpty() || p.name.toLowerCase().contains(q) || p.position.toLowerCase().contains(q)) {
+                        dialogFiltered.add(p);
+                    }
+                }
+                dialogAdapter.notifyDataSetChanged();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        listDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                PlayerData chosen = dialogFiltered.get(position);
+                if (isBench) {
+                    benchSlots[slotIndex] = chosen;
+                } else {
+                    startingEleven[slotIndex] = chosen;
+                }
+                renderPitchSlots();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.findViewById(R.id.btn_dialog_clear_slot).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isBench) benchSlots[slotIndex] = null;
+                else startingEleven[slotIndex] = null;
+                renderPitchSlots();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void saveTactics() {
+        SharedPreferences sp = getSharedPreferences("inazuma_tactics", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString("formation", currentFormation);
+        for (int i = 0; i < 11; i++) {
+            editor.putString("start_" + i, startingEleven[i] != null ? startingEleven[i].id : "");
+        }
+        for (int i = 0; i < 5; i++) {
+            editor.putString("bench_" + i, benchSlots[i] != null ? benchSlots[i].id : "");
+        }
+        editor.apply();
+        Toast.makeText(this, "💾 전술 스쿼드가 저장되었습니다!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void loadSavedTactics() {
+        SharedPreferences sp = getSharedPreferences("inazuma_tactics", MODE_PRIVATE);
+        currentFormation = sp.getString("formation", "4-4-2");
+        for (int i = 0; i < 11; i++) {
+            String id = sp.getString("start_" + i, "");
+            startingEleven[i] = findPlayerDataById(id);
+        }
+        for (int i = 0; i < 5; i++) {
+            String id = sp.getString("bench_" + i, "");
+            benchSlots[i] = findPlayerDataById(id);
+        }
+    }
+
+    private void resetTactics() {
+        for (int i = 0; i < 11; i++) startingEleven[i] = null;
+        for (int i = 0; i < 5; i++) benchSlots[i] = null;
+        renderPitchSlots();
+        Toast.makeText(this, "🔄 전술판이 초기화되었습니다.", Toast.LENGTH_SHORT).show();
+    }
+
+    private PlayerData findPlayerDataById(String id) {
+        if (id == null || id.isEmpty()) return null;
+        for (PlayerData p : allPlayers) {
+            if (p.id.equals(id)) return p;
+        }
+        return null;
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density + 0.5f);
+    }
+}`, 'utf8');
 
 // ==========================================
 // 6. 5,407명 데이터베이스 Asset 복사
@@ -1165,7 +1967,6 @@ execSync(`"${JAVAC}" -source 8 -target 8 -bootclasspath "${ANDROID_JAR}" -cp "${
 // 9. D8 바이트코드 생성
 // ==========================================
 console.log('⚡ [5/6] Dalvik 바이트코드 생성 (d8 -> classes.dex)...');
-const D8_JAR = path.join(BUILD_TOOLS, 'lib', 'd8.jar');
 const classFiles = [];
 function collectClasses(dir) {
   fs.readdirSync(dir).forEach(f => {
@@ -1196,10 +1997,9 @@ execSync(`"${ZIPALIGN}" -f -p 4 "${unalignedApk}" "${alignedApk}"`);
 const keystorePath = path.join(WORK_DIR, 'release.keystore');
 execSync(`"${KEYTOOL}" -genkey -v -keystore "${keystorePath}" -alias inazuma -keyalg RSA -keysize 2048 -validity 10000 -storepass inazuma123 -keypass inazuma123 -dname "CN=InazumaStation, OU=Mobile, O=VictoryRoad, L=Seoul, ST=Seoul, C=KR"`);
 
-const APKSIGNER_JAR = path.join(BUILD_TOOLS, 'lib', 'apksigner.jar');
 execSync(`"${JAVA}" -jar "${APKSIGNER_JAR}" sign --ks "${keystorePath}" --ks-pass pass:inazuma123 --ks-key-alias inazuma --key-pass pass:inazuma123 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out "${finalApkPath}" "${alignedApk}"`);
 
 execSync(`"${JAVA}" -jar "${APKSIGNER_JAR}" verify --verbose "${finalApkPath}"`);
 
-console.log('🎉 100% 순수 안드로이드 네이티브 APK 빌드 완료!');
+console.log('🎉 전술판 + 50개 페이징 + 바텀 네비게이션 탑재 순수 네이티브 APK 빌드 완료!');
 console.log('👉 산출물 파일:', finalApkPath);

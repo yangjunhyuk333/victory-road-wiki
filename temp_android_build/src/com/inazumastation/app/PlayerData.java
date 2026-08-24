@@ -14,7 +14,6 @@ public class PlayerData {
     public String descriptionKo = "";
     public String descriptionJa = "";
     public String statsText = "";
-    public String teamsText = "";
 
     public static PlayerData fromJson(JSONObject obj) {
         PlayerData p = new PlayerData();
