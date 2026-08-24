@@ -31,8 +31,13 @@ function run(cmd, cwd = distPath) {
 try {
   run('git init');
   run('git checkout -B gh-pages');
+  run('git lfs install');
+  run('git lfs track "*.zip"');
+  if (fs.existsSync(path.join(process.cwd(), '.gitattributes'))) {
+    fs.copyFileSync(path.join(process.cwd(), '.gitattributes'), path.join(distPath, '.gitattributes'));
+  }
   run('git add -A');
-  run('git commit -m "Deploy to GitHub Pages" --allow-empty');
+  run('git commit -m "Deploy to GitHub Pages with Git LFS" --allow-empty');
   run('git remote add origin https://github.com/yangjunhyuk333/victory-road-wiki.git');
   run('git remote set-url origin https://github.com/yangjunhyuk333/victory-road-wiki.git');
   run('git push -f origin gh-pages');
