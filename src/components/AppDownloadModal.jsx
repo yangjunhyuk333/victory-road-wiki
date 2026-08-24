@@ -164,61 +164,6 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                     </p>
                 </div>
 
-                {/* 🎯 접속 기기 자동 인식 하이라이트 배너 */}
-                <div style={{
-                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(139, 92, 246, 0.12))',
-                    border: '1.5px solid rgba(59, 130, 246, 0.4)',
-                    borderRadius: '16px',
-                    padding: '1rem',
-                    marginBottom: '1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '0.8rem',
-                    flexWrap: 'wrap'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '12px',
-                            background: 'var(--primary-color, #3B82F6)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
-                        }}>
-                            {deviceInfo.isTablet ? <Tablet size={22} /> : (deviceInfo.isMobile ? <Smartphone size={22} /> : <Monitor size={22} />)}
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--primary-color, #3B82F6)', fontWeight: 800 }}>
-                                현재 감지된 접속 기기
-                            </div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 800 }}>
-                                {deviceInfo.displayName}
-                            </div>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => setSelectedTab(deviceInfo.os === 'android' ? 'android' : (deviceInfo.os === 'ios' ? 'ios' : (deviceInfo.os === 'ipados' ? 'ipados' : 'windows')))}
-                        style={{
-                            background: 'var(--primary-color, #3B82F6)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '10px',
-                            padding: '0.45rem 0.85rem',
-                            fontSize: '0.78rem',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                        }}
-                    >
-                        맞춤 설치 보기 👉
-                    </button>
-                </div>
-
                 {/* OS 선택 탭 */}
                 <div style={{
                     display: 'grid',
@@ -495,31 +440,62 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Monitor size={18} color="#0EA5E9" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    Windows PC 데스크톱 프로그램
+                                    Windows PC 전용 앱 설치 &amp; 실행
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                웹 브라우저 없이 바탕화면에서 바로 켤 수 있는 고성능 윈도우 독립 실행형 프로그램(`InazumaStation.exe`)입니다.
+                                인터넷 주소창 없는 깔끔한 독립 실행 프로그램 모드로 바탕화면에서 바로 켤 수 있습니다.
                             </p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-                                {/* 윈도우 데스크톱 프로그램 안내 및 실행 */}
-                                <div style={{
-                                    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(2, 132, 199, 0.15))',
-                                    border: '1.5px solid rgba(14, 165, 233, 0.4)',
-                                    borderRadius: '14px',
-                                    padding: '0.9rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '0.4rem'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: '#38BDF8', fontSize: '0.88rem' }}>
-                                        <Monitor size={16} /> PC 즉시 실행 (무설치 포터블)
-                                    </div>
-                                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.4 }}>
-                                        바탕화면의 <strong>[이나즈마 스테이션.lnk]</strong> 또는 <code>InazumaStation_App/InazumaStation.exe</code>를 실행하면 인터넷 창 없이 독립 프로그램으로 구동됩니다.
-                                    </div>
-                                </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {/* PWA 1초 웹 앱 설치 버튼 (강력 추천) */}
+                                <button
+                                    onClick={handleInstallPWA}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '0.85rem 1rem',
+                                        fontWeight: 800,
+                                        fontSize: '0.88rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 14px rgba(14, 165, 233, 0.35)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <Sparkles size={18} />
+                                    <span>⚡ Windows PC 앱 즉시 설치 (1초 완료)</span>
+                                </button>
+
+                                {/* 윈도우 원클릭 데스크톱 런처 다운로드 */}
+                                <a
+                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation_Launcher.bat`}
+                                    download="InazumaStation_Launcher.bat"
+                                    style={{
+                                        background: 'rgba(14, 165, 233, 0.12)',
+                                        border: '1.5px solid rgba(14, 165, 233, 0.4)',
+                                        color: '#38BDF8',
+                                        borderRadius: '12px',
+                                        padding: '0.75rem 1rem',
+                                        fontWeight: 800,
+                                        fontSize: '0.82rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.4rem',
+                                        textDecoration: 'none',
+                                        transition: 'all 0.2s',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <Download size={16} />
+                                    <span>🖥️ PC 원클릭 독립 런처 파일 다운로드 (.bat)</span>
+                                </a>
 
                                 <div style={{
                                     fontSize: '0.75rem',
@@ -529,18 +505,11 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     color: 'var(--text-muted, #94a3b8)',
                                     lineHeight: 1.4
                                 }}>
-                                    ✨ <strong>로컬 바로가기</strong>: 로컬 프로젝트의 <code>InazumaStation_App/InazumaStation-win32-x64/InazumaStation.exe</code> 또는 바탕화면의 <code>이나즈마 스테이션.lnk</code>를 누르면 즉시 실행됩니다.
+                                    💡 <strong>Chrome / Edge 브라우저 팁</strong>: 브라우저 상단 우측의 <code>앱 설치 (⊕)</code> 버튼을 누르시면 작업표시줄과 바탕화면에 고화질 독립 앱이 생성됩니다!
                                 </div>
                             </div>
                         </div>
                     )}
-                </div>
-
-                {/* 하단 플러터 모바일 앱 소스 안내 */}
-                <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #94a3b8)' }}>
-                        📱 독립 격리된 Flutter 모바일 전용 앱 프로젝트: <code>inazuma_station_flutter/</code>
-                    </span>
                 </div>
             </div>
         </div>
