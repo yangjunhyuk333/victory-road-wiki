@@ -1851,41 +1851,16 @@ export default function Tactics() {
                                     포메이션 팩
                                 </button>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                                <button 
-                                    onClick={handleExportAllBackup}
-                                    style={{
-                                        background: 'rgba(100, 116, 139, 0.08)',
-                                        border: '1px solid var(--border-color)',
-                                        borderRadius: '8px',
-                                        padding: '0.3rem 0.55rem',
-                                        fontSize: '0.68rem',
-                                        fontWeight: 800,
-                                        cursor: 'pointer',
-                                        color: 'var(--text-main)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.25rem',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
-                                    onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-                                    title="저장된 모든 전술과 포메이션을 한 번에 JSON 백업 파일로 내보냅니다"
-                                >
-                                    <Download size={11} />
-                                    전체 백업
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        fetchSavedTacticsList();
-                                        fetchSavedFormationsList();
-                                    }}
-                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                    title="로컬 라이브러리 새로고침"
-                                >
-                                    <RefreshCw size={14} className={isFetchingList ? 'spin-animation' : ''} />
-                                </button>
-                            </div>
+                            <button 
+                                onClick={() => {
+                                    fetchSavedTacticsList();
+                                    fetchSavedFormationsList();
+                                }}
+                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                title="로컬 라이브러리 새로고침"
+                            >
+                                <RefreshCw size={14} className={isFetchingList ? 'spin-animation' : ''} />
+                            </button>
                         </div>
 
                         {/* 리스트 목록 뷰포트 (호버 시 그림자가 잘리지 않도록 4방향 여유 패딩 및 하단 여백 적용) */}
@@ -1893,27 +1868,17 @@ export default function Tactics() {
                             {archiveTab === 'tactics' ? (
                                 savedTactics.length > 0 ? (
                                     savedTactics.map((tact) => {
-                                        const isEditing = editingTacticsId === tact.id;
                                         return (
                                             <div 
                                                 key={tact.id}
                                                 className="tactic-item-card"
                                                 onClick={() => handleLoadTactics(tact)}
-                                                style={{
-                                                    border: isEditing ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                                                    background: isEditing ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-surface-pure)'
-                                                }}
                                             >
                                                 <div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
                                                         <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
                                                              {tact.title}
                                                         </h3>
-                                                        {isEditing && (
-                                                            <span style={{ fontSize: '0.62rem', background: 'var(--primary-color)', color: '#fff', padding: '1px 5px', borderRadius: '6px', fontWeight: 800 }}>
-                                                                수정 중
-                                                            </span>
-                                                        )}
                                                     </div>
                                                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
                                                         대형: {tact.formation} │ 주전: {Object.keys(tact.squad || {}).length}명 │ 후보: {Object.keys(tact.bench || {}).length}명
@@ -1966,27 +1931,17 @@ export default function Tactics() {
                             ) : (
                                 savedFormations.length > 0 ? (
                                     savedFormations.map((form) => {
-                                        const isEditing = editingFormationId === form.id;
                                         return (
                                             <div 
                                                 key={form.id}
                                                 className="tactic-item-card"
                                                 onClick={() => handleLoadFormationOnly(form)}
-                                                style={{
-                                                    border: isEditing ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
-                                                    background: isEditing ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-surface-pure)'
-                                                }}
                                             >
                                                 <div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
                                                         <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
                                                             {form.title}
                                                         </h3>
-                                                        {isEditing && (
-                                                            <span style={{ fontSize: '0.62rem', background: 'var(--primary-color)', color: '#fff', padding: '1px 5px', borderRadius: '6px', fontWeight: 800 }}>
-                                                                수정 중
-                                                            </span>
-                                                        )}
                                                     </div>
                                                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
                                                         기반: {form.formation} │ 좌표 노드: {form.positions?.length || 11}개
