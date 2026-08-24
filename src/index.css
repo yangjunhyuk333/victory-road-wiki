@@ -1046,3 +1046,104 @@ a:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px var(--primary-glow), inset 0 1px 1.5px rgba(255, 255, 255, 0.8);
 }
+
+/* ==========================================
+   전술판: 감독 & 벤치(후보 7인) 서브 섹션 스타일
+   ========================================== */
+.tactics-sub-bench-section {
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: var(--card-border);
+  border-radius: 18px;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow: var(--soft-shadow);
+}
+
+.tactics-bench-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tactics-coach-slot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tactics-bench-group-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: -0.5px;
+}
+
+.tactics-bench-divider {
+  width: 1.5px;
+  height: 85px;
+  background: var(--border-color);
+  margin-top: 1.4rem;
+  flex-shrink: 0;
+}
+
+.tactics-sub-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.tactics-sub-slots-grid {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.tactics-bench-card {
+  width: 68px !important;
+  height: 82px !important;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tactics-bench-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.tactics-coach-card {
+  border: 1.5px solid #F59E0B !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2) !important;
+}
+
+.tactics-coach-card:hover {
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.35) !important;
+  border-color: #D97706 !important;
+}
+
+.tactics-bench-card-empty {
+  width: 68px !important;
+  height: 82px !important;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.tactics-bench-card-empty:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.08);
+}

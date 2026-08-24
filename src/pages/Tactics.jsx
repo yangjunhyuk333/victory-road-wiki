@@ -137,7 +137,9 @@ export default function Tactics() {
     }, [toast.show]);
 
     const [selectedFormation, setSelectedFormation] = useState('4-4-2');
-    const [squad, setSquad] = useState({});                               // 포지션 ID별 선수 스토리지
+    const [squad, setSquad] = useState({});                               // 포지션 ID별 필드 선수 스토리지
+    const [bench, setBench] = useState({});                               // 벤치 후보 선수 스토리지 (0~6 슬롯)
+    const [coach, setCoach] = useState(null);                             // 감독 정보 스토리지
     const [positions, setPositions] = useState(() => FORMATIONS['4-4-2']); // 실시간 좌표를 관리하는 상태 추가 (자유배치 대응)
     const [tacticsTitle, setTacticsTitle] = useState('');                 // 전술명 인풋
     
@@ -392,29 +394,69 @@ export default function Tactics() {
         setIsSearchModalOpen(true);
     };
 
-    // 선수 모달창 바인딩 선택
+    // 선수/감독 모달창 바인딩 선택
     const handleSelectPlayer = (player) => {
-        setSquad(prev => ({
-            ...prev,
-            [activeSlotId]: {
+        if (activeSlotId === 'coach') {
+            // 1. 감독 슬롯 선택
+            setCoach({
                 id: player.id,
                 name: player.name,
                 image: player.image,
-                position: player.position,
-                element: player.element
-            }
-        }));
+                position: player.position || '감독',
+                element: player.element,
+                team: player.team
+            });
+        } else if (typeof activeSlotId === 'string' && activeSlotId.startsWith('bench_')) {
+            // 2. 벤치(후보) 슬롯 선택
+            const benchIndex = activeSlotId.replace('bench_', '');
+            setBench(prev => ({
+                ...prev,
+                [benchIndex]: {
+                    id: player.id,
+                    name: player.name,
+                    image: player.image,
+                    position: player.position,
+                    element: player.element
+                }
+            }));
+        } else {
+            // 3. 필드 주전 선수 슬롯 선택
+            setSquad(prev => ({
+                ...prev,
+                [activeSlotId]: {
+                    id: player.id,
+                    name: player.name,
+                    image: player.image,
+                    position: player.position,
+                    element: player.element
+                }
+            }));
+        }
         setIsSearchModalOpen(false);
     };
 
-    // 배치된 선수 지우기
+    // 배치된 선수/감독 지우기
     const handleClearSlot = (slotId, e) => {
         e.stopPropagation(); // 카드 자체의 클릭 이벤트 버블링 차단
-        setSquad(prev => {
-            const next = { ...prev };
-            delete next[slotId];
-            return next;
-        });
+        if (slotId === 'coach') {
+            // 감독 비우기
+            setCoach(null);
+        } else if (typeof slotId === 'string' && slotId.startsWith('bench_')) {
+            // 벤치 선수 비우기
+            const benchIndex = slotId.replace('bench_', '');
+            setBench(prev => {
+                const next = { ...prev };
+                delete next[benchIndex];
+                return next;
+            });
+        } else {
+            // 필드 선수 비우기
+            setSquad(prev => {
+                const next = { ...prev };
+                delete next[slotId];
+                return next;
+            });
+        }
     };
 
     // 새 전술 작성 모드로 리셋하는 함수
@@ -423,6 +465,8 @@ export default function Tactics() {
         setEditingFormationId(null);
         setTacticsTitle('');
         setSquad({});
+        setBench({});
+        setCoach(null);
         setPositions(FORMATIONS[selectedFormation] || FORMATIONS['4-4-2']);
         showToast("새로운 전술 작성을 시작합니다.", "info");
     };
@@ -457,6 +501,8 @@ export default function Tactics() {
                     title: title, // 이름 변경도 반영
                     formation: selectedFormation,
                     squad: squad,
+                    bench: bench,
+                    coach: coach,
                     positions: positions,
                     updatedAt: new Date().toISOString() // 수정 시각 갱신
                 };
@@ -472,6 +518,8 @@ export default function Tactics() {
                     title: title,
                     formation: selectedFormation,
                     squad: squad,
+                    bench: bench,
+                    coach: coach,
                     positions: positions,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -504,6 +552,8 @@ export default function Tactics() {
     const handleLoadTactics = (tactics) => {
         setSelectedFormation(tactics.formation);
         setSquad(tactics.squad || {});
+        setBench(tactics.bench || {});
+        setCoach(tactics.coach || null);
         // 개별 좌표가 저장되어 있으면 로드하고, 없으면 포메이션 기본값 사용
         setPositions(tactics.positions || FORMATIONS[tactics.formation]);
         setTacticsTitle(tactics.title);
@@ -646,15 +696,17 @@ export default function Tactics() {
         });
     };
 
-    // 신규: 배치된 모든 선수 전체 비우기 (에디터 편의 기능)
+    // 신규: 배치된 모든 선수/벤치/감독 전체 비우기 (에디터 편의 기능)
     const handleClearAllSquad = () => {
-        if (Object.keys(squad).length === 0) return;
+        if (Object.keys(squad).length === 0 && Object.keys(bench).length === 0 && !coach) return;
         setConfirmModal({
             show: true,
-            message: "현재 배치된 모든 선수를 전술판에서 비우시겠습니까?",
+            message: "현재 배치된 모든 주전, 벤치 후보 및 감독을 비우시겠습니까?",
             onConfirm: () => {
                 setSquad({});
-                showToast("전술판 스쿼드가 완전히 비워졌습니다.", "info");
+                setBench({});
+                setCoach(null);
+                showToast("전술판 스쿼드와 벤치, 감독이 완전히 비워졌습니다.", "info");
             }
         });
     };
@@ -1087,6 +1139,161 @@ export default function Tactics() {
                             );
                         })}
                     </div>
+
+                    {/* 2.1.2 하단 감독 & 벤치(후보 7인) 서브 섹션 */}
+                    <div className="glass-card tactics-sub-bench-section" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.6rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    👔 감독 & 벤치 멤버 (Substitutes)
+                                </span>
+                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                    (후보 {Object.keys(bench).length}/7명 │ 감독: {coach ? coach.name : '미선임'})
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* 감독과 벤치 슬롯들을 담는 래퍼 */}
+                        <div className="tactics-bench-wrapper">
+                            
+                            {/* 감독(Coach) 슬롯 영역 */}
+                            <div className="tactics-coach-slot-container">
+                                <span className="tactics-bench-group-title">감독 (Manager)</span>
+                                {coach ? (
+                                    <div 
+                                        className="tactics-card tactics-bench-card tactics-coach-card"
+                                        onClick={() => handleSlotClick('coach')}
+                                    >
+                                        <span className="tactics-card-badge-pos" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: '1.5px solid #fff', fontSize: '0.58rem', padding: '1px 5px' }}>
+                                            👑 감독
+                                        </span>
+                                        {coach.element && (
+                                            <span className="tactics-card-badge-elem">
+                                                {getElementIcon(coach.element)}
+                                            </span>
+                                        )}
+                                        <div className="tactics-card-avatar">
+                                            {coach.image ? (
+                                                <img 
+                                                    src={coach.image} 
+                                                    alt={coach.name}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div style={{
+                                                display: coach.image ? 'none' : 'flex',
+                                                width: '100%', height: '100%',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '1.4rem', fontWeight: 800,
+                                                color: 'var(--text-muted)'
+                                            }}>
+                                                {coach.name.charAt(0)}
+                                            </div>
+                                        </div>
+                                        <div className="tactics-card-info">
+                                            {coach.name}
+                                        </div>
+                                        <button
+                                            onClick={(e) => handleClearSlot('coach', e)}
+                                            className="tactics-card-clear-btn"
+                                            title="감독 해임/비우기"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div 
+                                        className="tactics-card-empty tactics-bench-card-empty"
+                                        onClick={() => handleSlotClick('coach')}
+                                        title="클릭하여 감독을 선임합니다"
+                                    >
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
+                                        <span className="tactics-card-empty-role" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+                                            감독 선임
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 구분선 (디바이더) */}
+                            <div className="tactics-bench-divider"></div>
+
+                            {/* 벤치 후보 선수들 (SUB 1 ~ 7) */}
+                            <div className="tactics-sub-slots-container">
+                                <span className="tactics-bench-group-title">후보 선수 (Bench 7인)</span>
+                                <div className="tactics-sub-slots-grid">
+                                    {[0, 1, 2, 3, 4, 5, 6].map((subIdx) => {
+                                        const subSlotKey = `bench_${subIdx}`;
+                                        const subPlayer = bench[subIdx];
+
+                                        return subPlayer ? (
+                                            <div 
+                                                key={subIdx}
+                                                className="tactics-card tactics-bench-card"
+                                                onClick={() => handleSlotClick(subSlotKey)}
+                                            >
+                                                <span className="tactics-card-badge-pos" style={{ background: '#64748B', border: '1.5px solid #fff' }}>
+                                                    {subPlayer.position || `SUB ${subIdx + 1}`}
+                                                </span>
+                                                {subPlayer.element && (
+                                                    <span className="tactics-card-badge-elem">
+                                                        {getElementIcon(subPlayer.element)}
+                                                    </span>
+                                                )}
+                                                <div className="tactics-card-avatar">
+                                                    {subPlayer.image ? (
+                                                        <img 
+                                                            src={subPlayer.image} 
+                                                            alt={subPlayer.name}
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <div style={{
+                                                        display: subPlayer.image ? 'none' : 'flex',
+                                                        width: '100%', height: '100%',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: '1.4rem', fontWeight: 800,
+                                                        color: 'var(--text-muted)'
+                                                    }}>
+                                                        {subPlayer.name.charAt(0)}
+                                                    </div>
+                                                </div>
+                                                <div className="tactics-card-info">
+                                                    {subPlayer.name}
+                                                </div>
+                                                <button
+                                                    onClick={(e) => handleClearSlot(subSlotKey, e)}
+                                                    className="tactics-card-clear-btn"
+                                                    title="후보 선수 비우기"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div 
+                                                key={subIdx}
+                                                className="tactics-card-empty tactics-bench-card-empty"
+                                                onClick={() => handleSlotClick(subSlotKey)}
+                                                title={`후보 ${subIdx + 1} 선수 등록`}
+                                            >
+                                                <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
+                                                <span className="tactics-card-empty-role">
+                                                    SUB {subIdx + 1}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
 
                 {/* 2.2 우측 에디터 사이드바 (저장 목록 아카이브 고화질 뷰어 단독 정돈) */}
@@ -1152,7 +1359,8 @@ export default function Tactics() {
                                                         )}
                                                     </div>
                                                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                                                        대형: {tact.formation} │ 선수: {Object.keys(tact.squad || {}).length}명
+                                                        대형: {tact.formation} │ 주전: {Object.keys(tact.squad || {}).length}명 │ 후보: {Object.keys(tact.bench || {}).length}명
+                                                        {tact.coach ? ` │ 감독: ${tact.coach.name}` : ''}
                                                         {tact.updatedAt && tact.updatedAt !== tact.createdAt && ' (수정됨)'}
                                                     </span>
                                                 </div>
@@ -1282,7 +1490,15 @@ export default function Tactics() {
                             <X size={20} />
                         </button>
 
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-main)' }}>선수 영입 및 배치</h2>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {activeSlotId === 'coach' ? (
+                                <>👔 감독 선임 (코칭스태프)</>
+                            ) : (typeof activeSlotId === 'string' && activeSlotId.startsWith('bench_')) ? (
+                                <>💺 후보 선수 등록 (SUB {parseInt(activeSlotId.replace('bench_', '')) + 1})</>
+                            ) : (
+                                <>⚽ 주전 선수 영입 및 배치</>
+                            )}
+                        </h2>
 
                         {/* 모달 검색바 */}
                         <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
@@ -1290,7 +1506,13 @@ export default function Tactics() {
                             <input 
                                 type="text"
                                 className="input-field"
-                                placeholder="선수명, 별칭을 검색하여 포지션에 배치..."
+                                placeholder={
+                                    activeSlotId === 'coach' 
+                                        ? "감독 또는 캐릭터 이름을 검색하여 선임..." 
+                                        : (typeof activeSlotId === 'string' && activeSlotId.startsWith('bench_'))
+                                            ? "후보 선수 이름을 검색하여 벤치에 등록..."
+                                            : "선수명, 별칭을 검색하여 포지션에 배치..."
+                                }
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setLimit(50); }}
                                 style={{ paddingLeft: '2.8rem' }}
