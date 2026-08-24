@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'; // 실시간 한글 번역 상태�
 import charactersData from '../data/characters.json';
 import { getPlayerDisplayName, seriesTranslation, refineTranslation, categoryTranslation, teamTranslation } from '../utils/playerHelpers'; // 헬퍼 모듈 임포트
 
-import { translateJaToKo } from '../utils/translationService';
-
 // 선수 상세 페이지 컴포넌트
 export default function PlayerDetail() {
   const { id } = useParams(); // URL 파라미터에서 선수의 고유 ID를 가져옵니다.
@@ -22,29 +20,45 @@ export default function PlayerDetail() {
   // 번역된 소속 팀 목록을 저장할 상태를 선언합니다.
   const [translatedTeams, setTranslatedTeams] = useState([]);
 
-  // 선수의 일어 설명을 감지해 한글로 실시간 번역해 주는 함수
-  const loadTranslation = async (forceRefresh = false) => {
+  // 선수의 일어 설명을 감지해 한글로 실시간 번역해 주는 오리지널 튜닝 함수
+  const loadTranslation = (forceRefresh = false) => {
     if (!player || !player.description) {
       setTranslatedDesc('');
       return;
     }
 
-    if (forceRefresh) {
-      try {
-        localStorage.removeItem(`inazuma_trans_v1_desc_${player.id}`);
-      } catch (e) {}
+    // 이미 설명 내에 한글 텍스트 자모가 믹스되어 있는 경우 번역을 건너뜁니다.
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(player.description);
+    if (hasKorean) {
+      setTranslatedDesc(refineTranslation(player.description));
+      return;
     }
 
     setIsTranslating(true);
-    try {
-      const res = await translateJaToKo(player.description, `desc_${player.id}`);
-      setTranslatedDesc(res);
-    } catch (err) {
-      console.error("인게임 상세 정보 실시간 번역 오류 발생:", err);
-      setTranslatedDesc(refineTranslation(player.description));
-    } finally {
-      setIsTranslating(false);
-    }
+    const jaText = player.description;
+
+    // 무료 CORS 우회 구글 번역 API 엔드포인트 (client=gtx)를 호출합니다.
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=ko&dt=t&q=${encodeURIComponent(jaText)}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data[0]) {
+          // 각 줄(청크) 단위의 번역 텍스트 결과 배열을 하나의 통합 스트링으로 합칩니다.
+          const translated = data[0].map(item => item[0]).join('');
+          // 구글 기계 번역 결과의 어색한 어휘들을 헬퍼 필터를 통해 매끄러운 한글 어투로 최종 정제합니다.
+          setTranslatedDesc(refineTranslation(translated));
+        } else {
+          setTranslatedDesc(refineTranslation(jaText));
+        }
+      })
+      .catch(err => {
+        console.error("인게임 상세 정보 실시간 번역 오류 발생:", err);
+        setTranslatedDesc(refineTranslation(jaText)); // 예외 발생 시 원본 일어라도 정제하여 출력
+      })
+      .finally(() => {
+        setIsTranslating(false);
+      });
   };
 
   useEffect(() => {

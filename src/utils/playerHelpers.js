@@ -311,7 +311,10 @@ export function refineTranslation(text) {
     { pattern: /를 가진/g, replace: '를 지닌' },
     { pattern: /을 가진다/g, replace: '을 지녔다' },
     { pattern: /를 가진다/g, replace: '를 지녔다' },
+    { pattern: /포기하지 않는 강한 마음을 지녔다/g, replace: '포기하지 않는 강한 의지를 지녔다' },
     { pattern: /포기하지 않는 강한 마음/g, replace: '포기하지 않는 강한 의지' },
+    { pattern: /강한 의지을 지녔다/g, replace: '강한 의지를 지녔다' },
+    { pattern: /강한 의지을/g, replace: '강한 의지를' },
     { pattern: /어떤 때라도/g, replace: '어떤 상황에서도' },
 
     // 4. 큰 몸, 巨体(거체) 등의 표현 한글 정제
@@ -563,8 +566,8 @@ export function refineTranslation(text) {
     { pattern: /준족을/g, replace: '빠른 발을' },
     { pattern: /준족의/g, replace: '빠른 발의' },
     { pattern: /준족/g, replace: '빠른 발' },
-    { pattern: /질풍과 같이/g, replace: '질풍처럼' },
-    { pattern: /질풍의 여파로/g, replace: '질풍처럼' },
+    { pattern: /필드를 질풍처럼 달려간다/g, replace: '그라운드를 질풍처럼 누빈다' },
+    { pattern: /필드를 질풍처럼 질주한다/g, replace: '그라운드를 질풍처럼 누빈다' },
     { pattern: /필드를 달려간다/g, replace: '그라운드를 누빈다' },
     { pattern: /필드를 달려가/g, replace: '그라운드를 누벼' }
   ];
