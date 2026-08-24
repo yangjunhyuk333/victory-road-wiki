@@ -332,17 +332,18 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Smartphone size={18} color="#10B981" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    갤럭시 및 Android 모바일 앱 1초 설치
+                                    갤럭시 및 Android 정식 APK 앱 설치
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                별도의 APK 파일 다운로드 검사나 파싱 오류 없이, 안드로이드 시스템이 <strong>1초 만에 스마트폰 홈 화면에 전용 앱으로 즉시 등록</strong>합니다.
+                                <strong>정식 디지털 서명(v2/v3) 및 바이트코드 컴파일</strong>이 완료되어 패키지 오류 없이 스마트폰에 독립 앱으로 즉시 설치되는 <strong>InazumaStation.apk</strong>입니다.
                             </p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-                                {/* 1. 원클릭 모바일 앱 설치 (PWA - 1순위 추천) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {/* 1. 정식 서명된 APK 직접 다운로드 (최우선) */}
                                 <button
-                                    onClick={handleInstallPWA}
+                                    onClick={handleDownloadApk}
+                                    disabled={isDownloadingApk}
                                     style={{
                                         background: 'linear-gradient(135deg, #10B981, #059669)',
                                         color: '#fff',
@@ -351,7 +352,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         padding: '0.9rem',
                                         fontSize: '0.92rem',
                                         fontWeight: 900,
-                                        cursor: 'pointer',
+                                        cursor: isDownloadingApk ? 'wait' : 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -359,10 +360,10 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)'
                                     }}
                                 >
-                                    <Sparkles size={18} /> ⚡ 갤럭시 원클릭 즉시 앱 설치
+                                    <Download size={18} /> {isDownloadingApk ? 'APK 파일 다운로드 중...' : 'InazumaStation.apk 독립 앱 직접 다운로드'}
                                 </button>
 
-                                {/* 2. 수동 설치 안내 가이드 */}
+                                {/* 2. APK 설치 팁 가이드 */}
                                 <div style={{
                                     background: 'rgba(16, 185, 129, 0.08)',
                                     border: '1px solid rgba(16, 185, 129, 0.25)',
@@ -370,46 +371,37 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     padding: '0.85rem',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    gap: '0.5rem',
+                                    gap: '0.45rem',
                                     fontSize: '0.78rem'
                                 }}>
-                                    <div style={{ fontWeight: 800, color: '#10B981', marginBottom: '0.1rem' }}>
-                                        📲 버튼이 안 눌릴 때 1초 설치 방법 (크롬 / 삼성인터넷):
+                                    <div style={{ fontWeight: 800, color: '#10B981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                        <CheckCircle2 size={14} /> 정식 안드로이드 v2/v3 보안 서명 완료:
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>1</span>
-                                        <span>브라우저 우측 상단 <strong>메뉴 (⋮)</strong> 또는 하단 <strong>메뉴 (≡)</strong> 클릭</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>2</span>
-                                        <span><strong>'앱 설치'</strong> 또는 <strong>'현재 페이지 추가 → 홈 화면'</strong> 선택</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>3</span>
-                                        <span>홈 화면에 <strong>이나즈마 스테이션 전용 앱 아이콘</strong> 생성 완료!</span>
+                                    <div style={{ color: 'var(--text-muted, #94a3b8)', lineHeight: 1.45 }}>
+                                        1. 다운로드 완료 후 알림창의 <code>InazumaStation.apk</code> 터치<br/>
+                                        2. <strong>'출처를 알 수 없는 앱 설치 허용'</strong>을 켜주시면 즉시 정상 설치 완료!
                                     </div>
                                 </div>
 
-                                {/* 3. APK 직접 다운로드 옵션 */}
+                                {/* 3. 브라우저 원클릭 홈 화면 추가 옵션 */}
                                 <button
-                                    onClick={handleDownloadApk}
-                                    disabled={isDownloadingApk}
+                                    onClick={handleInstallPWA}
                                     style={{
-                                        background: 'transparent',
-                                        color: 'var(--text-muted, #94a3b8)',
-                                        border: '1px dashed var(--border-color, #334155)',
+                                        background: 'rgba(59, 130, 246, 0.1)',
+                                        color: 'var(--primary-color, #3B82F6)',
+                                        border: '1px solid rgba(59, 130, 246, 0.3)',
                                         borderRadius: '12px',
                                         padding: '0.65rem',
-                                        fontSize: '0.78rem',
-                                        fontWeight: 700,
-                                        cursor: isDownloadingApk ? 'wait' : 'pointer',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.4rem'
                                     }}
                                 >
-                                    <Download size={14} /> {isDownloadingApk ? '다운로드 중...' : 'InazumaStation.apk 패키지 파일 다운로드'}
+                                    <Sparkles size={14} /> 간편 원클릭 홈 화면 앱 등록 (브라우저 연동)
                                 </button>
                             </div>
                         </div>
