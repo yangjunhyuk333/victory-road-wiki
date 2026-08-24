@@ -36,8 +36,8 @@ try {
   if (fs.existsSync(path.join(process.cwd(), '.gitattributes'))) {
     fs.copyFileSync(path.join(process.cwd(), '.gitattributes'), path.join(distPath, '.gitattributes'));
   }
-  run('git add -A');
-  run('git commit -m "Deploy to GitHub Pages with Git LFS" --allow-empty');
+  const timestamp = new Date().toISOString();
+  run(`git commit -m "Deploy to GitHub Pages at ${timestamp}" --allow-empty`);
   run('git remote add origin https://github.com/yangjunhyuk333/victory-road-wiki.git');
   run('git remote set-url origin https://github.com/yangjunhyuk333/victory-road-wiki.git');
   run('git push -f origin gh-pages');
