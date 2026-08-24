@@ -160,6 +160,11 @@ export default function Tactics() {
     const [isSaving, setIsSaving] = useState(false);
     const [isFetchingList, setIsFetchingList] = useState(false);
 
+    // ⚡ 실시간 자동 수정 (Auto-Save) 관련 상태
+    const [isAutoSave, setIsAutoSave] = useState(true);                  // 자동 수정 활성화 여부 (기본 ON)
+    const [autoSaveStatus, setAutoSaveStatus] = useState('idle');        // 'idle' | 'saving' | 'saved'
+    const isInitialMount = useRef(true);                                 // 첫 로드 시 자동 저장 방지용 ref
+
     // 선수 속성 미니 아이콘 반환
     const getElementIcon = (elem) => {
         switch (elem) {
@@ -457,6 +462,82 @@ export default function Tactics() {
                 return next;
             });
         }
+    };
+
+    // ⚡ 실시간 자동 수정(Auto-Save) 훅:
+    // 전술을 불러와서 수정 중이거나 제목이 기존 전술과 일치할 때, 변경사항을 500ms 디바운스로 로컬스토리지에 자동 덮어쓰기(수정)합니다.
+    useEffect(() => {
+        // 첫 렌더링 시에는 자동 수정을 건너뜁니다.
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        if (!isAutoSave) return;
+        const title = tacticsTitle.trim();
+        // 수정 중인 전술 ID가 없거나 제목이 아예 없으면 미완성 신규 등록을 방지하기 위해 자동 수정 대기
+        if (!editingTacticsId && !title) return;
+
+        const timer = setTimeout(() => {
+            try {
+                const localData = localStorage.getItem('victory_road_tactics');
+                const currentList = localData ? JSON.parse(localData) : [];
+
+                const existingIndex = currentList.findIndex(item => 
+                    (editingTacticsId && item.id === editingTacticsId) || 
+                    (title && item.title.trim().toLowerCase() === title.toLowerCase())
+                );
+
+                if (existingIndex !== -1) {
+                    setAutoSaveStatus('saving');
+                    const targetItem = currentList[existingIndex];
+                    const updatedItem = {
+                        ...targetItem,
+                        title: title || targetItem.title,
+                        formation: selectedFormation,
+                        squad: squad,
+                        bench: bench,
+                        coach: coach,
+                        positions: positions,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    const nextList = [...currentList];
+                    nextList[existingIndex] = updatedItem;
+                    localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
+
+                    if (!editingTacticsId) {
+                        setEditingTacticsId(targetItem.id);
+                    }
+
+                    setAutoSaveStatus('saved');
+                    fetchSavedTacticsList();
+
+                    // 2.5초 후 대기 상태로 원복
+                    setTimeout(() => {
+                        setAutoSaveStatus('idle');
+                    }, 2500);
+                }
+            } catch (error) {
+                console.error("자동 수정 중 오류:", error);
+            }
+        }, 500); // 500ms 디바운스
+
+        return () => clearTimeout(timer);
+    }, [squad, bench, coach, positions, selectedFormation, tacticsTitle, isAutoSave, editingTacticsId]);
+
+    // ✨ 스마트 포메이션 자동 정렬 / 중앙 보정 기능
+    const handleAutoAlignPositions = () => {
+        setPositions(prevPositions => {
+            return prevPositions.map(pos => {
+                // 중앙(X=50) 근처의 노드는 50%로 깔끔하게 중앙 흡착
+                if (Math.abs(pos.left - 50) < 4) {
+                    return { ...pos, left: 50 };
+                }
+                return pos;
+            });
+        });
+        showToast("포메이션 대형이 스마트 자동 정렬되었습니다.", "info");
     };
 
     // 새 전술 작성 모드로 리셋하는 함수
@@ -841,7 +922,7 @@ export default function Tactics() {
                             </select>
                         </div>
 
-                        {/* 툴바 섹션 3: 조작 제어 스위치 & 리셋 */}
+                        {/* 툴바 섹션 3: 조작 제어 스위치, 자동 수정, 자동 정렬 & 리셋 */}
                         <div className="editor-toolbar-section">
                             <button
                                 className={`btn ${isDragMode ? 'btn-primary' : 'btn-secondary'}`}
@@ -858,6 +939,50 @@ export default function Tactics() {
                             >
                                 {isDragMode ? '이동 모드' : '배치 모드'}
                             </button>
+
+                            {/* ⚡ 자동 수정(Auto-Save) 토글 버튼 & 실시간 상태 표시기 */}
+                            <button
+                                className={`btn ${isAutoSave ? 'btn-primary' : 'btn-secondary'}`}
+                                style={{
+                                    padding: '0.45rem 0.75rem',
+                                    fontSize: '0.72rem',
+                                    borderRadius: '10px',
+                                    borderWidth: '1.5px',
+                                    background: isAutoSave ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                                    borderColor: isAutoSave ? '#10B981' : 'var(--border-color)',
+                                    color: isAutoSave ? '#10B981' : 'var(--text-muted)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    fontWeight: 800,
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                    setIsAutoSave(!isAutoSave);
+                                    showToast(isAutoSave ? "자동 수정 기능이 꺼졌습니다." : "실시간 자동 수정 기능이 켜졌습니다.", "info");
+                                }}
+                                title="전술 편집 시 변경사항을 실시간으로 자동 수정/저장합니다"
+                            >
+                                <span style={{
+                                    width: '7px',
+                                    height: '7px',
+                                    borderRadius: '50%',
+                                    background: isAutoSave ? (autoSaveStatus === 'saving' ? '#F59E0B' : '#10B981') : 'var(--text-muted)',
+                                    boxShadow: isAutoSave ? (autoSaveStatus === 'saving' ? '0 0 8px #F59E0B' : '0 0 8px #10B981') : 'none'
+                                }}></span>
+                                {autoSaveStatus === 'saving' ? '자동 수정 중...' : (autoSaveStatus === 'saved' ? '자동 수정됨' : (isAutoSave ? '자동 수정 ON' : '자동 수정 OFF'))}
+                            </button>
+
+                            {/* ✨ 스마트 대형 자동 정렬 버튼 */}
+                            <button
+                                className="btn btn-secondary"
+                                style={{ padding: '0.45rem 0.65rem', fontSize: '0.72rem', borderRadius: '10px', background: 'transparent' }}
+                                onClick={handleAutoAlignPositions}
+                                title="포메이션 노드들을 중앙선(50%)에 맞추어 자동 정렬합니다"
+                            >
+                                ✨ 자동 정렬
+                            </button>
+
                             <button 
                                 onClick={handleClearAllSquad}
                                 style={{
