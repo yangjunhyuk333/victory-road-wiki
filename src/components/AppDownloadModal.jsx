@@ -482,7 +482,27 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     color: 'var(--text-muted, #94a3b8)',
                                     lineHeight: 1.5
                                 }}>
-                                    ✨ <strong>사용 안내</strong>: 다운로드받은 <code>InazumaStation_Windows.zip</code> 파일의 압축을 풀고 폴더 안의 <strong><code>InazumaStation.exe</code></strong>를 실행하시면 인터넷 창 없이 전용 PC 프로그램으로 즉시 구동됩니다!
+                                    ✨ <strong>사용 방법</strong>: 다운로드받은 <code>InazumaStation_Windows.zip</code> 압축을 풀고 폴더 안의 <strong><code>InazumaStation.exe</code></strong>를 실행하시면 독립 PC 프로그램으로 즉시 구동됩니다!
+                                </div>
+
+                                {/* 🛡️ 윈도우/크롬 다운로드 보안 경고 해제 안내 */}
+                                <div style={{
+                                    fontSize: '0.74rem',
+                                    background: 'rgba(234, 179, 8, 0.08)',
+                                    border: '1px solid rgba(234, 179, 8, 0.3)',
+                                    borderRadius: '12px',
+                                    padding: '0.85rem 1rem',
+                                    color: '#FBBF24',
+                                    lineHeight: 1.5
+                                }}>
+                                    <div style={{ fontWeight: 800, marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                        🛡️ 크롬 / 윈도우 '의심스러운 파일' 경고가 뜰 때 해결법:
+                                    </div>
+                                    <div style={{ color: 'var(--text-muted, #94a3b8)' }}>
+                                        개인 오픈소스 프로그램이라 인증서가 없어 발생하는 정상적인 브라우저 보안 알림입니다 (바이러스 없음).<br />
+                                        • <strong>Chrome / Edge</strong>: 다운로드 목록(우측 상단)에서 <code>[계속 다운로드]</code> 또는 <code>[유지]</code> 선택<br />
+                                        • <strong>Windows SmartScreen</strong>: 파란색 보호 창에서 <code>[추가 정보]</code> → <code>[실행]</code> 클릭
+                                    </div>
                                 </div>
                             </div>
                         </div>
