@@ -440,73 +440,49 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Monitor size={18} color="#0EA5E9" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    Windows PC 독립 실행형 로컬 프로그램 다운로드
+                                    Windows PC 전용 로컬 프로그램 다운로드
                                 </h3>
                             </div>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                웹 브라우저 창 없이 바탕화면에서 바로 켤 수 있는 고성능 윈도우 독립 실행형 프로그램(`InazumaStation.exe`) 압축본입니다.
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1.25rem' }}>
+                                웹 브라우저 창이나 주소창 없이 바탕화면에서 바로 켤 수 있는 고성능 윈도우 독립 실행형 프로그램(`InazumaStation.exe`) 압축 파일입니다.
                             </p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {/* 윈도우 로컬 프로그램 압축본 다운로드 (최우선) */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                                {/* 윈도우 로컬 프로그램 ZIP 다운로드 버튼 */}
                                 <a
-                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation_Windows.tar.xz`}
-                                    download="InazumaStation_Windows.tar.xz"
+                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation_Windows.zip`}
+                                    download="InazumaStation_Windows.zip"
                                     style={{
                                         background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
                                         color: '#fff',
-                                        borderRadius: '12px',
-                                        padding: '0.85rem 1rem',
-                                        fontWeight: 800,
-                                        fontSize: '0.88rem',
+                                        borderRadius: '14px',
+                                        padding: '1rem 1.25rem',
+                                        fontWeight: 900,
+                                        fontSize: '0.95rem',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '0.5rem',
+                                        gap: '0.6rem',
                                         textDecoration: 'none',
-                                        boxShadow: '0 4px 14px rgba(14, 165, 233, 0.35)',
+                                        boxShadow: '0 6px 20px rgba(14, 165, 233, 0.4)',
                                         transition: 'all 0.2s',
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    <Download size={18} />
-                                    <span>💾 Windows 로컬 프로그램 압축본 다운로드 (89MB)</span>
-                                </a>
-
-                                {/* 윈도우 원클릭 데스크톱 런처 다운로드 */}
-                                <a
-                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation_Launcher.bat`}
-                                    download="InazumaStation_Launcher.bat"
-                                    style={{
-                                        background: 'rgba(14, 165, 233, 0.12)',
-                                        border: '1.5px solid rgba(14, 165, 233, 0.4)',
-                                        color: '#38BDF8',
-                                        borderRadius: '12px',
-                                        padding: '0.75rem 1rem',
-                                        fontWeight: 800,
-                                        fontSize: '0.82rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.4rem',
-                                        textDecoration: 'none',
-                                        transition: 'all 0.2s',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <Download size={16} />
-                                    <span>🖥️ PC 원클릭 독립 런처 파일 다운로드 (.bat)</span>
+                                    <Download size={20} />
+                                    <span>💾 InazumaStation Windows 프로그램 다운로드 (.zip)</span>
                                 </a>
 
                                 <div style={{
-                                    fontSize: '0.75rem',
-                                    background: 'rgba(100, 116, 139, 0.1)',
-                                    borderRadius: '10px',
-                                    padding: '0.6rem 0.8rem',
+                                    fontSize: '0.78rem',
+                                    background: 'rgba(14, 165, 233, 0.08)',
+                                    border: '1px solid rgba(14, 165, 233, 0.25)',
+                                    borderRadius: '12px',
+                                    padding: '0.85rem 1rem',
                                     color: 'var(--text-muted, #94a3b8)',
-                                    lineHeight: 1.4
+                                    lineHeight: 1.5
                                 }}>
-                                    ✨ <strong>실행 방법</strong>: 다운로드받은 압축을 풀고 폴더 안의 <code>InazumaStation.exe</code>를 실행하시면 독립 프로그램으로 부드럽게 구동됩니다. (알집/반디집/탐색기 지원)
+                                    ✨ <strong>사용 안내</strong>: 다운로드받은 <code>InazumaStation_Windows.zip</code> 파일의 압축을 풀고 폴더 안의 <strong><code>InazumaStation.exe</code></strong>를 실행하시면 인터넷 창 없이 전용 PC 프로그램으로 즉시 구동됩니다!
                                 </div>
                             </div>
                         </div>
