@@ -180,6 +180,8 @@ export default function Tactics() {
     const isInitialMount = useRef(true);                                 // 첫 로드 시 자동 저장 방지용 ref
     const isDirtyRef = useRef(false);                                    // 사용자가 실제로 변경을 가했을 때만 자동 수정 트리거
     const autoSaveTimerRef = useRef(null);                               // 자동 수정 디바운스 타이머 ref
+    const isSwitchingTacticsRef = useRef(false);                         // 전술 로드/전환 중 자동 저장 간섭 방지 락 ref
+    const hasLoadedFromUrlRef = useRef(false);                           // URL loadId 1회만 로드하는 ref
 
     // 선수 속성 미니 아이콘 반환
     const getElementIcon = (elem) => {
@@ -242,11 +244,12 @@ export default function Tactics() {
         fetchSavedFormationsList();
     }, []);
 
-    // URL 쿼리 파라미터로 전달된 loadId가 있으면 자동으로 해당 전술 탑재
+    // URL 쿼리 파라미터로 전달된 loadId가 있으면 최초 1회만 자동으로 해당 전술 탑재
     useEffect(() => {
-        if (loadId && savedTactics.length > 0) {
+        if (loadId && savedTactics.length > 0 && !hasLoadedFromUrlRef.current) {
             const target = savedTactics.find(t => t.id === loadId);
             if (target) {
+                hasLoadedFromUrlRef.current = true;
                 handleLoadTactics(target);
             }
         }
@@ -490,7 +493,7 @@ export default function Tactics() {
     // ⚡ 실시간 자동 수정(Auto-Save) 훅:
     // 사용자가 불러와서 현재 수정 중인 항목(editingTacticsIdRef.current 또는 editingFormationIdRef.current)이 있을 때만
     // 사용자의 직접 조작(isDirtyRef.current === true)을 500ms 디바운스로 로컬스토리지에 안전하게 자동 덮어씁니다.
-    // 신규 작성 모드이거나 단순 조회 시에는 다른 기존 전술로 강제 이동되거나 덮어쓰지 않습니다.
+    // 전술 전환 락(isSwitchingTacticsRef.current === true) 중에는 이전 전술 데이터 간섭 방지를 위해 절대 동작하지 않습니다.
     useEffect(() => {
         // 첫 렌더링 시에는 자동 수정을 건너뜁니다.
         if (isInitialMount.current) {
@@ -498,8 +501,8 @@ export default function Tactics() {
             return;
         }
 
-        // 사용자가 직접 변경을 가하지 않은 단순 로드/조회 상태거나 자동 저장이 꺼져 있으면 즉시 중단
-        if (!isDirtyRef.current || !isAutoSave) return;
+        // 전술 전환 중이거나, 사용자가 직접 변경을 가하지 않은 단순 로드 상태거나, 자동 저장이 꺼져 있으면 즉시 중단
+        if (isSwitchingTacticsRef.current || !isDirtyRef.current || !isAutoSave) return;
 
         // 수정 중인 ID가 전혀 없는 신규 작성 상태면 기존 전술을 멋대로 덮어쓰지 않도록 차단
         if (!editingTacticsIdRef.current && !editingFormationIdRef.current) return;
@@ -509,8 +512,8 @@ export default function Tactics() {
         }
 
         autoSaveTimerRef.current = setTimeout(() => {
-            // 실행 직전 한 번 더 isDirty 확인
-            if (!isDirtyRef.current) return;
+            // 실행 직전 한 번 더 락 및 isDirty 확인
+            if (isSwitchingTacticsRef.current || !isDirtyRef.current) return;
 
             const activeEditingId = editingTacticsIdRef.current;
             const activeEditingFormId = editingFormationIdRef.current;
@@ -596,6 +599,9 @@ export default function Tactics() {
 
     // ✨ 스마트 포메이션 자동 정렬 / 중앙 보정 기능
     const handleAutoAlignPositions = () => {
+        // 전술 전환 락이 걸려있으면 자동 정렬 안전 방어
+        if (isSwitchingTacticsRef.current) return;
+
         // 수정 중인 전술이나 포메이션이 있는 경우에만 자동 저장 큐에 플래그 설정
         if (editingTacticsIdRef.current || editingFormationIdRef.current) {
             isDirtyRef.current = true;
@@ -614,8 +620,12 @@ export default function Tactics() {
 
     // 새 전술 작성 모드로 리셋하는 함수
     const handleNewTactics = () => {
-        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+            autoSaveTimerRef.current = null;
+        }
         isDirtyRef.current = false; // 리셋 시 더티 플래그 해제
+        isSwitchingTacticsRef.current = true; // 전환 락 활성화
         setAutoSaveStatus('idle');
         updateEditingTacticsId(null);
         updateEditingFormationId(null);
@@ -625,6 +635,12 @@ export default function Tactics() {
         setCoach(null);
         setPositions(FORMATIONS[selectedFormation] || FORMATIONS['4-4-2']);
         showToast("새로운 전술 작성을 시작합니다.", "info");
+
+        // React 상태 바인딩 완료 후 락 해제
+        setTimeout(() => {
+            isDirtyRef.current = false;
+            isSwitchingTacticsRef.current = false;
+        }, 150);
     };
 
     // 현재의 전술판 배치 및 좌표 셋을 localStorage에 저장 또는 기존 전술 수정 (0ms 지연)
@@ -708,8 +724,12 @@ export default function Tactics() {
 
     // 저장되었던 전술 라이브러리 상태 가져오기 (수정 모드로 전환)
     const handleLoadTactics = (tactics) => {
-        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+            autoSaveTimerRef.current = null;
+        }
         isDirtyRef.current = false; // 전술 로드 시에는 자동 수정을 절대 트리거하지 않도록 차단!
+        isSwitchingTacticsRef.current = true; // 전환 락 활성화
         setAutoSaveStatus('idle');
         
         updateEditingTacticsId(tactics.id);       // 현재 수정 중인 전술 ID 등록 (ref 동기화)
@@ -722,6 +742,12 @@ export default function Tactics() {
         setPositions(tactics.positions || FORMATIONS[tactics.formation]);
         setTacticsTitle(tactics.title);
         showToast(`"${tactics.title}" 전술을 불러왔습니다. (수정 모드)`, "success");
+
+        // React 상태 바인딩 완료 후 락 해제
+        setTimeout(() => {
+            isDirtyRef.current = false;
+            isSwitchingTacticsRef.current = false;
+        }, 150);
     };
 
     // 저장 전술 데이터 삭제 (0ms 지연)
@@ -826,8 +852,12 @@ export default function Tactics() {
 
     // 신규: 포메이션 대형(좌표)만 로드 (선수 정보 squad는 그대로 보존, 수정 모드 전환)
     const handleLoadFormationOnly = (formItem) => {
-        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        if (autoSaveTimerRef.current) {
+            clearTimeout(autoSaveTimerRef.current);
+            autoSaveTimerRef.current = null;
+        }
         isDirtyRef.current = false; // 로드 시에는 자동 수정 트리거 방지
+        isSwitchingTacticsRef.current = true; // 전환 락 활성화
         setAutoSaveStatus('idle');
         updateEditingTacticsId(null);         // 전술 수정 ID 확실히 해제 (ref 동기화)
         updateEditingFormationId(formItem.id); // 포메이션 수정 모드 등록 (ref 동기화)
@@ -835,6 +865,11 @@ export default function Tactics() {
         setSelectedFormation('커스텀');
         setTacticsTitle(formItem.title);
         showToast(`"${formItem.title}" 포메이션 대형을 불러왔습니다. (선수 배치 유지)`, "success");
+
+        setTimeout(() => {
+            isDirtyRef.current = false;
+            isSwitchingTacticsRef.current = false;
+        }, 150);
     };
 
     // 신규: 저장된 포메이션 단독 데이터 삭제 (0ms 지연)
