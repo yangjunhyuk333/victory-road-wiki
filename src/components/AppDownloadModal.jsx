@@ -11,6 +11,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
     const [selectedTab, setSelectedTab] = useState('auto');
     const [pwaPrompt, setPwaPrompt] = useState(null);
     const [isInstalled, setIsInstalled] = useState(false);
+    const [isDownloadingApk, setIsDownloadingApk] = useState(false);
 
     useEffect(() => {
         const detected = detectDeviceOS();
@@ -35,6 +36,37 @@ export default function AppDownloadModal({ isOpen, onClose }) {
 
     if (!isOpen) return null;
 
+    // 안전한 직접 APK 파일 다운로드 핸들러
+    const handleDownloadApk = async () => {
+        try {
+            setIsDownloadingApk(true);
+            const apkUrl = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk`;
+            const response = await fetch(apkUrl);
+            if (!response.ok) throw new Error('Download failed');
+            
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(new Blob([blob], { type: 'application/vnd.android.package-archive' }));
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = 'InazumaStation.apk';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            // Fallback: 직접 링크 열기
+            const link = document.createElement('a');
+            link.href = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk`;
+            link.download = 'InazumaStation.apk';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } finally {
+            setIsDownloadingApk(false);
+        }
+    };
+
     // PWA 즉시 설치 트리거 핸들러
     const handleInstallPWA = async () => {
         if (pwaPrompt) {
@@ -45,7 +77,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
             }
             setPwaPrompt(null);
         } else {
-            alert("브라우저 메뉴(⋮ 또는 공유 버튼)에서 '홈 화면에 추가' 또는 '앱 설치'를 눌러주시면 즉시 앱으로 설치됩니다!");
+            alert("스마트폰 브라우저 상단/하단 메뉴(⋮ 또는 공유)에서 '홈 화면에 추가' 또는 '앱 설치'를 눌러주시면 즉시 1초 만에 앱으로 설치됩니다!");
         }
     };
 
@@ -304,36 +336,36 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                Android 기기에서 설치할 수 있는 <strong>APK 설치 파일</strong>을 직접 다운로드하거나, <strong>원클릭 모바일 앱</strong>으로 즉시 설치하실 수 있습니다.
+                                보안 경고나 파싱 오류 없이 즉시 실행되는 <strong>원클릭 모바일 앱(추천)</strong> 또는 <strong>InazumaStation.apk 파일</strong>을 다운로드하실 수 있습니다.
                             </p>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
-                                {/* APK 직접 다운로드 버튼 (사이트 내부 즉시 다운로드) */}
-                                <a
-                                    href={`${import.meta.env.BASE_URL}downloads/InazumaStation.apk`}
-                                    download="InazumaStation.apk"
+                                {/* 1. 원클릭 모바일 앱 설치 (PWA - 1순위 추천) */}
+                                <button
+                                    onClick={handleInstallPWA}
                                     style={{
                                         background: 'linear-gradient(135deg, #10B981, #059669)',
                                         color: '#fff',
-                                        textDecoration: 'none',
+                                        border: 'none',
                                         borderRadius: '14px',
                                         padding: '0.85rem',
                                         fontSize: '0.88rem',
                                         fontWeight: 800,
+                                        cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.5rem',
-                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-                                        cursor: 'pointer'
+                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
                                     }}
                                 >
-                                    <Download size={16} /> InazumaStation.apk 직접 다운로드 (원클릭)
-                                </a>
+                                    <Sparkles size={16} /> ⚡ 갤럭시 원클릭 즉시 앱 설치 (추천)
+                                </button>
 
-                                {/* 원클릭 모바일 앱 설치 (PWA) */}
+                                {/* 2. APK 파일 직접 다운로드 (Blob 스트림) */}
                                 <button
-                                    onClick={handleInstallPWA}
+                                    onClick={handleDownloadApk}
+                                    disabled={isDownloadingApk}
                                     style={{
                                         background: 'rgba(59, 130, 246, 0.12)',
                                         color: 'var(--primary-color, #3B82F6)',
@@ -342,25 +374,27 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         padding: '0.75rem',
                                         fontSize: '0.82rem',
                                         fontWeight: 800,
-                                        cursor: 'pointer',
+                                        cursor: isDownloadingApk ? 'wait' : 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.45rem'
                                     }}
                                 >
-                                    <Sparkles size={15} /> 브라우저 원클릭 앱 즉시 등록
+                                    <Download size={15} /> {isDownloadingApk ? 'APK 파일 다운로드 중...' : 'InazumaStation.apk 파일 직접 다운로드'}
                                 </button>
 
                                 <div style={{
-                                    fontSize: '0.75rem',
+                                    fontSize: '0.74rem',
                                     background: 'rgba(100, 116, 139, 0.1)',
                                     borderRadius: '10px',
                                     padding: '0.6rem 0.8rem',
                                     color: 'var(--text-muted, #94a3b8)',
-                                    lineHeight: 1.4
+                                    lineHeight: 1.5
                                 }}>
-                                    💡 <strong>Flutter 빌드</strong>: <code>inazuma_station_flutter</code> 폴더에서 <code>flutter build apk --release</code>로 최신 네이티브 APK를 생성할 수 있습니다.
+                                    💡 <strong>다운로드 팁</strong>:<br/>
+                                    • 브라우저에서 '유해할 수 있는 파일' 경고가 표시되면 <strong>[계속 다운로드]</strong>를 눌러주세요.<br/>
+                                    • 설치 시 <strong>[출처를 알 수 없는 앱 설치 허용]</strong>을 켜주시면 정상 설치됩니다.
                                 </div>
                             </div>
                         </div>
