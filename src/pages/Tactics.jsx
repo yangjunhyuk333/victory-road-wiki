@@ -152,6 +152,8 @@ export default function Tactics() {
 
     const [savedTactics, setSavedTactics] = useState([]);
     const [savedFormations, setSavedFormations] = useState([]);           // 고도화: 저장된 포메이션 좌표셋 리스트
+    const [editingTacticsId, setEditingTacticsId] = useState(null);       // 현재 수정 중인 전술 ID
+    const [editingFormationId, setEditingFormationId] = useState(null);   // 현재 수정 중인 포메이션 ID
     const [archiveTab, setArchiveTab] = useState('tactics');             // 아카이브 탭 전환 상태 ('tactics' / 'formations')
     const [isSaving, setIsSaving] = useState(false);
     const [isFetchingList, setIsFetchingList] = useState(false);
@@ -415,31 +417,80 @@ export default function Tactics() {
         });
     };
 
-    // 현재의 전술판 배치 및 좌표 셋을 localStorage에 저장 (0ms 지연)
+    // 새 전술 작성 모드로 리셋하는 함수
+    const handleNewTactics = () => {
+        setEditingTacticsId(null);
+        setEditingFormationId(null);
+        setTacticsTitle('');
+        setSquad({});
+        setPositions(FORMATIONS[selectedFormation] || FORMATIONS['4-4-2']);
+        showToast("새로운 전술 작성을 시작합니다.", "info");
+    };
+
+    // 현재의 전술판 배치 및 좌표 셋을 localStorage에 저장 또는 기존 전술 수정 (0ms 지연)
     const handleSaveTactics = () => {
-        if (!tacticsTitle.trim()) {
+        const title = tacticsTitle.trim();
+        if (!title) {
             showToast("전술 이름을 입력해 주세요.", "error");
             return;
         }
 
         setIsSaving(true);
         try {
-            const newTacticsItem = {
-                id: Date.now().toString(),
-                title: tacticsTitle.trim(),
-                formation: selectedFormation,
-                squad: squad,
-                positions: positions,
-                createdAt: new Date().toISOString()
-            };
-
             const localData = localStorage.getItem('victory_road_tactics');
             const currentList = localData ? JSON.parse(localData) : [];
-            const nextList = [newTacticsItem, ...currentList];
+
+            // 1. 현재 불러와서 수정 중인 전술 ID가 있거나, 또는 입력한 이름과 똑같은 기존 전술이 있는지 확인합니다.
+            const existingIndex = currentList.findIndex(item => 
+                (editingTacticsId && item.id === editingTacticsId) || 
+                item.title.trim().toLowerCase() === title.toLowerCase()
+            );
+
+            let nextList;
+            let isUpdate = false;
+
+            if (existingIndex !== -1) {
+                // [기존 전술 수정 모드]: 새 전술을 추가하지 않고, 기존 전술 항목의 내용을 최신 상태로 덮어씁니다.
+                const targetItem = currentList[existingIndex];
+                const updatedItem = {
+                    ...targetItem,
+                    title: title, // 이름 변경도 반영
+                    formation: selectedFormation,
+                    squad: squad,
+                    positions: positions,
+                    updatedAt: new Date().toISOString() // 수정 시각 갱신
+                };
+
+                nextList = [...currentList];
+                nextList[existingIndex] = updatedItem;
+                setEditingTacticsId(targetItem.id); // 수정 모드 유지
+                isUpdate = true;
+            } else {
+                // [새 전술 신규 저장 모드]: 기존에 없는 이름이므로 새로운 전술 아이템으로 등록합니다.
+                const newTacticsItem = {
+                    id: Date.now().toString(),
+                    title: title,
+                    formation: selectedFormation,
+                    squad: squad,
+                    positions: positions,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                nextList = [newTacticsItem, ...currentList];
+                setEditingTacticsId(newTacticsItem.id); // 저장 후에도 수정 모드로 전환
+                isUpdate = false;
+            }
+
+            // 로컬스토리지에 최신 목록 영속 저장
             localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
 
-            showToast("나만의 전술 배치가 로컬 저장소에 저장되었습니다!", "success");
-            setTacticsTitle('');
+            if (isUpdate) {
+                showToast(`기존 전술 "${title}"이(가) 성공적으로 수정되었습니다!`, "success");
+            } else {
+                showToast(`새로운 전술 "${title}"이(가) 성공적으로 저장되었습니다!`, "success");
+            }
+
             fetchSavedTacticsList();
         } catch (error) {
             console.error("전술 저장 에러:", error);
@@ -449,14 +500,16 @@ export default function Tactics() {
         }
     };
 
-    // 저장되었던 전술 라이브러리 상태 가져오기
+    // 저장되었던 전술 라이브러리 상태 가져오기 (수정 모드로 전환)
     const handleLoadTactics = (tactics) => {
         setSelectedFormation(tactics.formation);
         setSquad(tactics.squad || {});
         // 개별 좌표가 저장되어 있으면 로드하고, 없으면 포메이션 기본값 사용
         setPositions(tactics.positions || FORMATIONS[tactics.formation]);
         setTacticsTitle(tactics.title);
-        showToast(`"${tactics.title}" 전술을 성공적으로 불러왔습니다.`, "success");
+        setEditingTacticsId(tactics.id);       // 현재 수정 중인 전술 ID 등록
+        setEditingFormationId(null);           // 포메이션 수정 모드는 해제
+        showToast(`"${tactics.title}" 전술을 불러왔습니다. (수정 모드)`, "success");
     };
 
     // 저장 전술 데이터 삭제 (0ms 지연)
@@ -471,6 +524,12 @@ export default function Tactics() {
                     const currentList = localData ? JSON.parse(localData) : [];
                     const nextList = currentList.filter(item => item.id !== tacticsId);
                     localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
+                    
+                    // 만약 현재 수정 중이던 전술이 삭제되었다면 수정 모드 해제
+                    if (editingTacticsId === tacticsId) {
+                        setEditingTacticsId(null);
+                    }
+                    
                     fetchSavedTacticsList();
                     showToast("전술 배치가 삭제되었습니다.", "success");
                 } catch (error) {
@@ -481,30 +540,67 @@ export default function Tactics() {
         });
     };
 
-    // 신규: 포메이션 대형(좌표)만 단독 저장 (0ms 지연)
+    // 신규: 포메이션 대형(좌표)만 단독 저장 또는 기존 포메이션 대형 수정 (0ms 지연)
     const handleSaveFormationOnly = () => {
-        if (!tacticsTitle.trim()) {
+        const title = tacticsTitle.trim();
+        if (!title) {
             showToast("저장할 포메이션 이름을 입력해 주세요.", "error");
             return;
         }
 
         setIsSaving(true);
         try {
-            const newFormItem = {
-                id: Date.now().toString(),
-                title: tacticsTitle.trim(),
-                formation: selectedFormation,
-                positions: positions.map(p => ({ id: p.id, role: p.role, top: p.top, left: p.left })),
-                createdAt: new Date().toISOString()
-            };
-
             const localData = localStorage.getItem('victory_road_formations');
             const currentList = localData ? JSON.parse(localData) : [];
-            const nextList = [newFormItem, ...currentList];
+
+            // 기존 동일 이름 또는 수정 중인 포메이션 검사
+            const existingIndex = currentList.findIndex(item => 
+                (editingFormationId && item.id === editingFormationId) || 
+                item.title.trim().toLowerCase() === title.toLowerCase()
+            );
+
+            let nextList;
+            let isUpdate = false;
+
+            if (existingIndex !== -1) {
+                // 기존 포메이션 대형 수정
+                const targetItem = currentList[existingIndex];
+                const updatedItem = {
+                    ...targetItem,
+                    title: title,
+                    formation: selectedFormation,
+                    positions: positions.map(p => ({ id: p.id, role: p.role, top: p.top, left: p.left })),
+                    updatedAt: new Date().toISOString()
+                };
+
+                nextList = [...currentList];
+                nextList[existingIndex] = updatedItem;
+                setEditingFormationId(targetItem.id);
+                isUpdate = true;
+            } else {
+                // 새로운 포메이션 대형 추가
+                const newFormItem = {
+                    id: Date.now().toString(),
+                    title: title,
+                    formation: selectedFormation,
+                    positions: positions.map(p => ({ id: p.id, role: p.role, top: p.top, left: p.left })),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                nextList = [newFormItem, ...currentList];
+                setEditingFormationId(newFormItem.id);
+                isUpdate = false;
+            }
+
             localStorage.setItem('victory_road_formations', JSON.stringify(nextList));
 
-            showToast("나만의 포메이션 대형(좌표)이 저장되었습니다!", "success");
-            setTacticsTitle('');
+            if (isUpdate) {
+                showToast(`기존 포메이션 "${title}" 대형이 수정되었습니다!`, "success");
+            } else {
+                showToast(`새로운 포메이션 "${title}" 대형이 저장되었습니다!`, "success");
+            }
+
             fetchSavedFormationsList();
         } catch (error) {
             console.error("포메이션 저장 에러:", error);
@@ -514,10 +610,12 @@ export default function Tactics() {
         }
     };
 
-    // 신규: 포메이션 대형(좌표)만 로드 (선수 정보 squad는 그대로 보존)
+    // 신규: 포메이션 대형(좌표)만 로드 (선수 정보 squad는 그대로 보존, 수정 모드 전환)
     const handleLoadFormationOnly = (formItem) => {
         setPositions(formItem.positions || FORMATIONS['4-4-2']);
         setSelectedFormation('커스텀');
+        setTacticsTitle(formItem.title);
+        setEditingFormationId(formItem.id); // 포메이션 수정 모드 등록
         showToast(`"${formItem.title}" 포메이션 대형을 불러왔습니다. (선수 배치 유지)`, "success");
     };
 
@@ -533,6 +631,11 @@ export default function Tactics() {
                     const currentList = localData ? JSON.parse(localData) : [];
                     const nextList = currentList.filter(item => item.id !== formId);
                     localStorage.setItem('victory_road_formations', JSON.stringify(nextList));
+                    
+                    if (editingFormationId === formId) {
+                        setEditingFormationId(null);
+                    }
+                    
                     fetchSavedFormationsList();
                     showToast("포메이션 대형이 성공적으로 삭제되었습니다.", "success");
                 } catch (error) {
@@ -580,33 +683,79 @@ export default function Tactics() {
                     {/* 피그마/전문 에디터 스타일의 애플 리퀴드 툴바 */}
                     <div className="editor-toolbar">
                         
-                        {/* 툴바 섹션 1: 이름 입력 및 저장 */}
-                        <div className="editor-toolbar-section">
-                            <input 
-                                type="text"
-                                className="editor-input"
-                                placeholder="전술 / 포메이션명..."
-                                value={tacticsTitle}
-                                onChange={(e) => setTacticsTitle(e.target.value)}
-                                title="저장할 타이틀 이름 입력"
-                            />
+                        {/* 툴바 섹션 1: 이름 입력, 수정 상태 뱃지 및 저장/신규 버튼 */}
+                        <div className="editor-toolbar-section" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                <input 
+                                    type="text"
+                                    className="editor-input"
+                                    placeholder="전술 / 포메이션명..."
+                                    value={tacticsTitle}
+                                    onChange={(e) => setTacticsTitle(e.target.value)}
+                                    title="저장할 타이틀 이름 입력"
+                                    style={{ paddingRight: (editingTacticsId || editingFormationId) ? '2.2rem' : '0.8rem' }}
+                                />
+                                {(editingTacticsId || editingFormationId) && (
+                                    <button
+                                        onClick={handleNewTactics}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '6px',
+                                            background: 'rgba(239, 68, 68, 0.1)',
+                                            color: '#EF4444',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            width: '18px',
+                                            height: '18px',
+                                            fontSize: '10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            fontWeight: 800
+                                        }}
+                                        title="수정 모드 취소 (새 전술로 시작)"
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* 저장 버튼: 수정 중이거나 같은 이름이 있으면 [전술 수정], 신규면 [전체 저장] */}
                             <button 
                                 className="btn btn-primary"
-                                style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem', borderRadius: '10px' }}
+                                style={{ 
+                                    padding: '0.45rem 0.85rem', 
+                                    fontSize: '0.75rem', 
+                                    borderRadius: '10px',
+                                    background: (editingTacticsId || savedTactics.some(t => t.title.trim().toLowerCase() === tacticsTitle.trim().toLowerCase() && tacticsTitle.trim())) 
+                                        ? 'linear-gradient(135deg, #10B981, #059669)' 
+                                        : 'var(--primary-color)'
+                                }}
                                 onClick={handleSaveTactics}
                                 disabled={isSaving}
-                                title="현재 선수 배치와 대형을 로컬에 저장합니다"
+                                title={
+                                    (editingTacticsId || savedTactics.some(t => t.title.trim().toLowerCase() === tacticsTitle.trim().toLowerCase() && tacticsTitle.trim()))
+                                        ? `기존 전술 "${tacticsTitle.trim()}"을(를) 수정하여 저장(덮어쓰기)합니다`
+                                        : "새로운 전술 배치를 로컬에 저장합니다"
+                                }
                             >
-                                <Save size={13} /> 전체 저장
+                                <Save size={13} /> 
+                                {(editingTacticsId || savedTactics.some(t => t.title.trim().toLowerCase() === tacticsTitle.trim().toLowerCase() && tacticsTitle.trim())) 
+                                    ? '전술 수정' 
+                                    : '전체 저장'}
                             </button>
+
                             <button 
                                 className="btn btn-secondary"
                                 style={{ padding: '0.45rem 0.85rem', fontSize: '0.75rem', borderRadius: '10px', background: 'transparent' }}
                                 onClick={handleSaveFormationOnly}
                                 disabled={isSaving}
-                                title="배치된 선수는 빼고 오직 포메이션 대형(좌표)만 로컬에 저장합니다"
+                                title="배치된 선수는 빼고 오직 포메이션 대형(좌표)만 로컬에 저장/수정합니다"
                             >
-                                대형 저장
+                                {(editingFormationId || savedFormations.some(f => f.title.trim().toLowerCase() === tacticsTitle.trim().toLowerCase() && tacticsTitle.trim())) 
+                                    ? '대형 수정' 
+                                    : '대형 저장'}
                             </button>
                         </div>
 
@@ -979,37 +1128,52 @@ export default function Tactics() {
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto', padding: '0.5rem 0.6rem 1.5rem 0.5rem' }} className="custom-scrollbar">
                             {archiveTab === 'tactics' ? (
                                 savedTactics.length > 0 ? (
-                                    savedTactics.map((tact) => (
-                                        <div 
-                                            key={tact.id}
-                                            className="tactic-item-card"
-                                            onClick={() => handleLoadTactics(tact)}
-                                        >
-                                            <div>
-                                                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                                                    {tact.title}
-                                                </h3>
-                                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                                                    대형: {tact.formation} │ 선수: {Object.keys(tact.squad || {}).length}명
-                                                </span>
-                                            </div>
-                                            <button 
-                                                onClick={(e) => handleDeleteTactics(tact.id, e)}
+                                    savedTactics.map((tact) => {
+                                        const isEditing = editingTacticsId === tact.id;
+                                        return (
+                                            <div 
+                                                key={tact.id}
+                                                className="tactic-item-card"
+                                                onClick={() => handleLoadTactics(tact)}
                                                 style={{
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: 'var(--text-muted)',
-                                                    padding: '4px',
-                                                    transition: 'all 0.2s'
+                                                    border: isEditing ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
+                                                    background: isEditing ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-surface-pure)'
                                                 }}
-                                                onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
-                                                onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
                                             >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    ))
+                                                <div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                                                        <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                                            {tact.title}
+                                                        </h3>
+                                                        {isEditing && (
+                                                            <span style={{ fontSize: '0.62rem', background: 'var(--primary-color)', color: '#fff', padding: '1px 5px', borderRadius: '6px', fontWeight: 800 }}>
+                                                                수정 중
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                                        대형: {tact.formation} │ 선수: {Object.keys(tact.squad || {}).length}명
+                                                        {tact.updatedAt && tact.updatedAt !== tact.createdAt && ' (수정됨)'}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    onClick={(e) => handleDeleteTactics(tact.id, e)}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        color: 'var(--text-muted)',
+                                                        padding: '4px',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
+                                                    onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })
                                 ) : (
                                     <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
                                         저장된 로컬 전술이 없습니다.
@@ -1017,37 +1181,52 @@ export default function Tactics() {
                                 )
                             ) : (
                                 savedFormations.length > 0 ? (
-                                    savedFormations.map((form) => (
-                                        <div 
-                                            key={form.id}
-                                            className="tactic-item-card"
-                                            onClick={() => handleLoadFormationOnly(form)}
-                                        >
-                                            <div>
-                                                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                                                    {form.title}
-                                                </h3>
-                                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                                                    기반: {form.formation} │ 좌표 노드: {form.positions?.length || 11}개
-                                                </span>
-                                            </div>
-                                            <button 
-                                                onClick={(e) => handleDeleteFormationOnly(form.id, e)}
+                                    savedFormations.map((form) => {
+                                        const isEditing = editingFormationId === form.id;
+                                        return (
+                                            <div 
+                                                key={form.id}
+                                                className="tactic-item-card"
+                                                onClick={() => handleLoadFormationOnly(form)}
                                                 style={{
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: 'var(--text-muted)',
-                                                    padding: '4px',
-                                                    transition: 'all 0.2s'
+                                                    border: isEditing ? '2px solid var(--primary-color)' : '1px solid var(--border-color)',
+                                                    background: isEditing ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-surface-pure)'
                                                 }}
-                                                onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
-                                                onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
                                             >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    ))
+                                                <div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                                                        <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                                                            {form.title}
+                                                        </h3>
+                                                        {isEditing && (
+                                                            <span style={{ fontSize: '0.62rem', background: 'var(--primary-color)', color: '#fff', padding: '1px 5px', borderRadius: '6px', fontWeight: 800 }}>
+                                                                수정 중
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                                        기반: {form.formation} │ 좌표 노드: {form.positions?.length || 11}개
+                                                        {form.updatedAt && form.updatedAt !== form.createdAt && ' (수정됨)'}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    onClick={(e) => handleDeleteFormationOnly(form.id, e)}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        color: 'var(--text-muted)',
+                                                        padding: '4px',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
+                                                    onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })
                                 ) : (
                                     <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
                                         저장된 로컬 포메이션이 없습니다.
