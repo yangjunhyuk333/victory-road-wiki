@@ -332,11 +332,11 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Smartphone size={18} color="#10B981" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    갤럭시 및 Android 스마트폰 앱 설치
+                                    갤럭시 및 Android 모바일 앱 1초 설치
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                보안 경고나 파싱 오류 없이 즉시 실행되는 <strong>원클릭 모바일 앱(추천)</strong> 또는 <strong>InazumaStation.apk 파일</strong>을 다운로드하실 수 있습니다.
+                                별도의 APK 파일 다운로드 검사나 파싱 오류 없이, 안드로이드 시스템이 <strong>1초 만에 스마트폰 홈 화면에 전용 앱으로 즉시 등록</strong>합니다.
                             </p>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
@@ -348,54 +348,69 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                         color: '#fff',
                                         border: 'none',
                                         borderRadius: '14px',
-                                        padding: '0.85rem',
-                                        fontSize: '0.88rem',
-                                        fontWeight: 800,
+                                        padding: '0.9rem',
+                                        fontSize: '0.92rem',
+                                        fontWeight: 900,
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         gap: '0.5rem',
-                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                                        boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)'
                                     }}
                                 >
-                                    <Sparkles size={16} /> ⚡ 갤럭시 원클릭 즉시 앱 설치 (추천)
+                                    <Sparkles size={18} /> ⚡ 갤럭시 원클릭 즉시 앱 설치
                                 </button>
 
-                                {/* 2. APK 파일 직접 다운로드 (Blob 스트림) */}
+                                {/* 2. 수동 설치 안내 가이드 */}
+                                <div style={{
+                                    background: 'rgba(16, 185, 129, 0.08)',
+                                    border: '1px solid rgba(16, 185, 129, 0.25)',
+                                    borderRadius: '14px',
+                                    padding: '0.85rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.5rem',
+                                    fontSize: '0.78rem'
+                                }}>
+                                    <div style={{ fontWeight: 800, color: '#10B981', marginBottom: '0.1rem' }}>
+                                        📲 버튼이 안 눌릴 때 1초 설치 방법 (크롬 / 삼성인터넷):
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>1</span>
+                                        <span>브라우저 우측 상단 <strong>메뉴 (⋮)</strong> 또는 하단 <strong>메뉴 (≡)</strong> 클릭</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>2</span>
+                                        <span><strong>'앱 설치'</strong> 또는 <strong>'현재 페이지 추가 → 홈 화면'</strong> 선택</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <span style={{ background: '#10B981', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>3</span>
+                                        <span>홈 화면에 <strong>이나즈마 스테이션 전용 앱 아이콘</strong> 생성 완료!</span>
+                                    </div>
+                                </div>
+
+                                {/* 3. APK 직접 다운로드 옵션 */}
                                 <button
                                     onClick={handleDownloadApk}
                                     disabled={isDownloadingApk}
                                     style={{
-                                        background: 'rgba(59, 130, 246, 0.12)',
-                                        color: 'var(--primary-color, #3B82F6)',
-                                        border: '1.5px solid rgba(59, 130, 246, 0.35)',
-                                        borderRadius: '14px',
-                                        padding: '0.75rem',
-                                        fontSize: '0.82rem',
-                                        fontWeight: 800,
+                                        background: 'transparent',
+                                        color: 'var(--text-muted, #94a3b8)',
+                                        border: '1px dashed var(--border-color, #334155)',
+                                        borderRadius: '12px',
+                                        padding: '0.65rem',
+                                        fontSize: '0.78rem',
+                                        fontWeight: 700,
                                         cursor: isDownloadingApk ? 'wait' : 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '0.45rem'
+                                        gap: '0.4rem'
                                     }}
                                 >
-                                    <Download size={15} /> {isDownloadingApk ? 'APK 파일 다운로드 중...' : 'InazumaStation.apk 파일 직접 다운로드'}
+                                    <Download size={14} /> {isDownloadingApk ? '다운로드 중...' : 'InazumaStation.apk 패키지 파일 다운로드'}
                                 </button>
-
-                                <div style={{
-                                    fontSize: '0.74rem',
-                                    background: 'rgba(100, 116, 139, 0.1)',
-                                    borderRadius: '10px',
-                                    padding: '0.6rem 0.8rem',
-                                    color: 'var(--text-muted, #94a3b8)',
-                                    lineHeight: 1.5
-                                }}>
-                                    💡 <strong>다운로드 팁</strong>:<br/>
-                                    • 브라우저에서 '유해할 수 있는 파일' 경고가 표시되면 <strong>[계속 다운로드]</strong>를 눌러주세요.<br/>
-                                    • 설치 시 <strong>[출처를 알 수 없는 앱 설치 허용]</strong>을 켜주시면 정상 설치됩니다.
-                                </div>
                             </div>
                         </div>
                     )}
@@ -496,28 +511,24 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                 웹 브라우저 없이 바탕화면에서 바로 켤 수 있는 고성능 윈도우 독립 실행형 프로그램(`InazumaStation.exe`)입니다.
                             </p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                <a
-                                    href="https://github.com/yangjunhyuk333/victory-road-wiki/releases"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #0EA5E9, #0284C7)',
-                                        color: '#fff',
-                                        textDecoration: 'none',
-                                        borderRadius: '12px',
-                                        padding: '0.8rem',
-                                        fontSize: '0.88rem',
-                                        fontWeight: 800,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '0.5rem',
-                                        boxShadow: '0 4px 14px rgba(14, 165, 233, 0.4)'
-                                    }}
-                                >
-                                    <Download size={16} /> Windows 데스크톱 앱 (.exe) 다운로드
-                                </a>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                                {/* 윈도우 데스크톱 프로그램 안내 및 실행 */}
+                                <div style={{
+                                    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(2, 132, 199, 0.15))',
+                                    border: '1.5px solid rgba(14, 165, 233, 0.4)',
+                                    borderRadius: '14px',
+                                    padding: '0.9rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.4rem'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, color: '#38BDF8', fontSize: '0.88rem' }}>
+                                        <Monitor size={16} /> PC 즉시 실행 (무설치 포터블)
+                                    </div>
+                                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.4 }}>
+                                        바탕화면의 <strong>[이나즈마 스테이션.lnk]</strong> 또는 <code>InazumaStation_App/InazumaStation.exe</code>를 실행하면 인터넷 창 없이 독립 프로그램으로 구동됩니다.
+                                    </div>
+                                </div>
 
                                 <div style={{
                                     fontSize: '0.75rem',
@@ -527,7 +538,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     color: 'var(--text-muted, #94a3b8)',
                                     lineHeight: 1.4
                                 }}>
-                                    ✨ 로컬 프로젝트 폴더의 <code>InazumaStation_App/InazumaStation-win32-x64/InazumaStation.exe</code> 및 바탕화면 바로가기를 통해 즉시 실행 가능합니다.
+                                    ✨ <strong>로컬 바로가기</strong>: 로컬 프로젝트의 <code>InazumaStation_App/InazumaStation-win32-x64/InazumaStation.exe</code> 또는 바탕화면의 <code>이나즈마 스테이션.lnk</code>를 누르면 즉시 실행됩니다.
                                 </div>
                             </div>
                         </div>

@@ -1,5 +1,7 @@
-﻿import { execSync } from 'child_process';
+import { execSync } from 'child_process';
 import path from 'path';
+
+import fs from 'fs';
 
 // 현재 프로젝트 루트 기준 dist 폴더 경로
 const distPath = path.join(process.cwd(), 'dist');
@@ -8,6 +10,12 @@ console.log('🚀 [1/3] 프로덕션 빌드 시작...');
 execSync('npm run build', { stdio: 'inherit' });
 
 console.log('📦 [2/3] GitHub Pages(gh-pages) 배포 준비 중...');
+
+// dist 폴더 내 이전 .git 제거하여 깨끗한 단일 커밋 상태 보장
+const distGit = path.join(distPath, '.git');
+if (fs.existsSync(distGit)) {
+  fs.rmSync(distGit, { recursive: true, force: true });
+}
 
 function run(cmd, cwd = distPath) {
   try {

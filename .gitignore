@@ -25,4 +25,6 @@ temp_electron_build
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+# Large Binaries
+InazumaStation_Windows.zip
+public/downloads/InazumaStation_Windows.zip
