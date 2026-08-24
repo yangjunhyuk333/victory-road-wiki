@@ -1234,3 +1234,118 @@ a:hover {
     overflow-x: auto;
   }
 }
+
+/* ==========================================
+   📱 모바일 전용 플로팅 바텀 네비게이션 바 & Safe Area (768px 미만)
+   ========================================== */
+.mobile-bottom-nav-container {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+.mobile-bottom-nav {
+  pointer-events: auto;
+  margin: 0 auto;
+  max-width: 480px;
+  background: var(--bg-surface-pure, #1e293b);
+  border: 1.5px solid var(--border-color, #334155);
+  border-radius: 28px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(59, 130, 246, 0.15);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  text-decoration: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.75rem;
+  border-radius: 18px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.mobile-nav-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary-color, #3B82F6);
+  font-weight: 800;
+}
+
+.mobile-nav-item.active .mobile-nav-icon-wrapper {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--primary-color));
+}
+
+.mobile-nav-indicator {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary-color, #3B82F6);
+  box-shadow: 0 0 6px var(--primary-color);
+}
+
+.mobile-nav-item.highlight {
+  color: #10B981;
+  font-weight: 800;
+}
+
+.mobile-nav-item.highlight .mobile-nav-icon-wrapper {
+  color: #10B981;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4));
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.92);
+}
+
+/* 768px 미만(스마트폰 모바일)에서 바텀바 활성화 및 하단 여백 확보 */
+@media (max-width: 768px) {
+  .mobile-bottom-nav-container {
+    display: block;
+  }
+  
+  .app-main-content {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .nav-desktop-link {
+    display: none !important;
+  }
+
+  .app-download-nav-btn span {
+    display: none;
+  }
+
+  .app-download-nav-btn {
+    padding: 0.45rem !important;
+    border-radius: 50% !important;
+  }
+}

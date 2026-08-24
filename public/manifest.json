@@ -1,0 +1,24 @@
+{
+  "short_name": "이나즈마 스테이션",
+  "name": "이나즈마 스테이션 - 빅토리로드 전술 & 도감",
+  "description": "이나즈마 일레븐 빅토리로드 5,400+ 선수 도감 및 스마트 축구 전술판 스튜디오",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#0F172A",
+  "theme_color": "#3B82F6",
+  "display": "standalone",
+  "orientation": "any"
+}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy, BookOpen, Users, Star, ArrowRight, Zap, Folder, Plus, Trash2, Shield, Search } from 'lucide-react';
+import { Trophy, BookOpen, Users, Star, ArrowRight, Zap, Folder, Plus, Trash2, Shield, Search, Download, Smartphone } from 'lucide-react';
 // 캐릭터 데이터베이스 JSON 파일을 직접 로드하여 퀵 검색 및 랜덤 스카우트와 연동합니다.
 import charactersData from '../data/characters.json';
 import { getPlayerDisplayName, teamTranslation } from '../utils/playerHelpers'; // 중복 캐릭터 버전 표시 및 팀명 한글화 헬퍼 임포트
 
-export default function Home() {
+export default function Home({ onOpenDownloadModal }) {
     const navigate = useNavigate();
     const [savedTactics, setSavedTactics] = useState([]);
     
@@ -138,18 +138,43 @@ export default function Home() {
                     </div>
                 </div>
                 
-                {/* 콤팩트 통계 현황판 */}
-                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                {/* 콤팩트 통계 현황판 및 앱 다운로드 버튼 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'right', borderRight: '1px solid var(--border-color)', paddingRight: '1.5rem' }}>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>로컬 스쿼드 파일</div>
                         <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--primary-color)', marginTop: '0.1rem' }}>
                             {localStorage.getItem('victory_road_tactics') ? JSON.parse(localStorage.getItem('victory_road_tactics')).length : 0}개
                         </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'right', borderRight: onOpenDownloadModal ? '1px solid var(--border-color)' : 'none', paddingRight: onOpenDownloadModal ? '1.5rem' : '0' }}>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>총 데이터베이스</div>
                         <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--accent-color)', marginTop: '0.1rem' }}>5,400+명</div>
                     </div>
+                    {onOpenDownloadModal && (
+                        <button
+                            onClick={onOpenDownloadModal}
+                            className="btn btn-secondary"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.6rem 1.1rem',
+                                borderRadius: '16px',
+                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.12))',
+                                border: '1.5px solid rgba(59, 130, 246, 0.3)',
+                                fontSize: '0.85rem',
+                                fontWeight: 800,
+                                color: 'var(--text-main)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                            onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)'}
+                        >
+                            <Smartphone size={16} color="var(--primary-color)" />
+                            모바일/태블릿 앱 설치
+                        </button>
+                    )}
                 </div>
             </header>
 
