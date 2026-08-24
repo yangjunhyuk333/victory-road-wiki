@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import charactersData from '../data/characters.json';
-import { Search, Save, Trash2, FolderOpen, RefreshCw, X, Award, Flame, Wind, TreePine, Mountain, Move, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Search, Save, Trash2, FolderOpen, RefreshCw, X, Award, Flame, Wind, TreePine, Mountain, Move, CheckCircle, AlertTriangle, AlertCircle, Download, Upload } from 'lucide-react';
 
 // 고도화: 지원 포메이션 확장 라인업 (총 8종의 기본 레이아웃 정의)
 const FORMATIONS = {
@@ -917,6 +917,277 @@ export default function Tactics() {
         });
     };
 
+    // ==========================================
+    // 💾 전술 파일 내보내기 (Export) & 불러오기 (Import)
+    // ==========================================
+
+    // 숨김 처리된 파일 input DOM 참조 ref
+    const fileInputRef = useRef(null);
+
+    // 공통 JSON 파일 다운로드 트리거 헬퍼 함수
+    const downloadJsonFile = (data, filename) => {
+        try {
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("파일 다운로드 에러:", error);
+            showToast("파일 내보내기 중 오류가 발생했습니다.", "error");
+        }
+    };
+
+    // 📤 1. 현재 작성/수정 중인 단일 전술 파일로 내보내기 (.json)
+    const handleExportCurrentTactics = () => {
+        const title = tacticsTitle.trim() || '무제_전술';
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const exportData = {
+            type: 'inazuma_tactic',
+            version: '1.0.0',
+            exportedAt: new Date().toISOString(),
+            tactic: {
+                id: editingTacticsIdRef.current || `imported_${Date.now()}`,
+                title: title,
+                formation: selectedFormation,
+                squad: squad,
+                bench: bench,
+                coach: coach,
+                positions: positions,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }
+        };
+
+        const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_');
+        downloadJsonFile(exportData, `[이나즈마전술]_${safeTitle}_${dateStr}.json`);
+        showToast(`"${title}" 전술 파일이 내보내졌습니다!`, "success");
+    };
+
+    // 📤 2. 저장된 특정 전술 1개 파일 다운로드 (.json)
+    const handleExportSingleSavedTactics = (tact, e) => {
+        if (e) e.stopPropagation();
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const exportData = {
+            type: 'inazuma_tactic',
+            version: '1.0.0',
+            exportedAt: new Date().toISOString(),
+            tactic: tact
+        };
+        const safeTitle = (tact.title || '전술').replace(/[\\/:*?"<>|]/g, '_');
+        downloadJsonFile(exportData, `[이나즈마전술]_${safeTitle}_${dateStr}.json`);
+        showToast(`"${tact.title}" 전술 파일이 다운로드되었습니다!`, "success");
+    };
+
+    // 📤 3. 저장된 특정 포메이션 1개 파일 다운로드 (.json)
+    const handleExportSingleSavedFormation = (form, e) => {
+        if (e) e.stopPropagation();
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const exportData = {
+            type: 'inazuma_formation',
+            version: '1.0.0',
+            exportedAt: new Date().toISOString(),
+            formation: form
+        };
+        const safeTitle = (form.title || '포메이션').replace(/[\\/:*?"<>|]/g, '_');
+        downloadJsonFile(exportData, `[이나즈마포메이션]_${safeTitle}_${dateStr}.json`);
+        showToast(`"${form.title}" 포메이션 파일이 다운로드되었습니다!`, "success");
+    };
+
+    // 📤 4. 전체 전술 및 포메이션 라이브러리 일괄 백업 내보내기 (.json)
+    const handleExportAllBackup = () => {
+        if (savedTactics.length === 0 && savedFormations.length === 0) {
+            showToast("내보낼 저장된 전술이나 포메이션이 없습니다.", "info");
+            return;
+        }
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const backupData = {
+            type: 'inazuma_backup_all',
+            version: '1.0.0',
+            exportedAt: new Date().toISOString(),
+            tactics: savedTactics,
+            formations: savedFormations
+        };
+        downloadJsonFile(backupData, `[이나즈마_전체전술백업]_${dateStr}.json`);
+        showToast(`전체 전술(${savedTactics.length}개) 및 포메이션(${savedFormations.length}개) 백업 파일이 다운로드되었습니다!`, "success");
+    };
+
+    // 📥 5. 파일 불러오기 버튼 클릭 핸들러 (숨김 input 트리거)
+    const handleTriggerFileInput = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''; // 동일 파일 재선택 허용
+            fileInputRef.current.click();
+        }
+    };
+
+    // 📥 6. 선택된 JSON 파일 파싱 및 전술판 로드 / 라이브러리 등록
+    const handleImportFile = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const parsed = JSON.parse(event.target.result);
+
+                // A-1. 단일 전술 파일 형식 ([이나즈마전술])
+                if (parsed.type === 'inazuma_tactic' && parsed.tactic) {
+                    const targetTactic = parsed.tactic;
+                    const validTactic = {
+                        id: targetTactic.id || `imported_${Date.now()}`,
+                        title: targetTactic.title || '불러온 전술',
+                        formation: targetTactic.formation || '4-4-2',
+                        squad: targetTactic.squad || {},
+                        bench: targetTactic.bench || {},
+                        coach: targetTactic.coach || null,
+                        positions: targetTactic.positions || FORMATIONS[targetTactic.formation] || FORMATIONS['4-4-2'],
+                        createdAt: targetTactic.createdAt || new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    // 1. 전술판에 즉시 마운트
+                    handleLoadTactics(validTactic);
+
+                    // 2. 로컬 저장소 라이브러리에도 자동 동기화
+                    const localData = localStorage.getItem('victory_road_tactics');
+                    const currentList = localData ? JSON.parse(localData) : [];
+                    const existingIndex = currentList.findIndex(item => 
+                        item.id === validTactic.id || 
+                        item.title.trim().toLowerCase() === validTactic.title.trim().toLowerCase()
+                    );
+
+                    let nextList;
+                    if (existingIndex !== -1) {
+                        nextList = [...currentList];
+                        nextList[existingIndex] = validTactic;
+                    } else {
+                        nextList = [validTactic, ...currentList];
+                    }
+                    localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
+                    fetchSavedTacticsList();
+
+                    showToast(`"${validTactic.title}" 전술 파일을 성공적으로 불러왔습니다!`, "success");
+                }
+                // A-2. 단일 포메이션 대형 파일 형식 ([이나즈마포메이션])
+                else if (parsed.type === 'inazuma_formation' && parsed.formation) {
+                    const targetForm = parsed.formation;
+                    const validForm = {
+                        id: targetForm.id || `imported_${Date.now()}`,
+                        title: targetForm.title || '불러온 포메이션',
+                        formation: targetForm.formation || '4-4-2',
+                        positions: targetForm.positions || FORMATIONS[targetForm.formation] || FORMATIONS['4-4-2'],
+                        createdAt: targetForm.createdAt || new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    handleLoadFormationOnly(validForm);
+
+                    const localData = localStorage.getItem('victory_road_formations');
+                    const currentList = localData ? JSON.parse(localData) : [];
+                    const existingIndex = currentList.findIndex(item => 
+                        item.id === validForm.id || 
+                        item.title.trim().toLowerCase() === validForm.title.trim().toLowerCase()
+                    );
+
+                    let nextList;
+                    if (existingIndex !== -1) {
+                        nextList = [...currentList];
+                        nextList[existingIndex] = validForm;
+                    } else {
+                        nextList = [validForm, ...currentList];
+                    }
+                    localStorage.setItem('victory_road_formations', JSON.stringify(nextList));
+                    fetchSavedFormationsList();
+
+                    showToast(`"${validForm.title}" 포메이션 파일을 성공적으로 불러왔습니다!`, "success");
+                }
+                // B. 전체 백업 파일 형식 ([이나즈마_전체전술백업])
+                else if (parsed.type === 'inazuma_backup_all' || Array.isArray(parsed.tactics) || Array.isArray(parsed)) {
+                    const incomingTactics = parsed.tactics || (Array.isArray(parsed) ? parsed : []);
+                    const incomingFormations = parsed.formations || [];
+
+                    if (incomingTactics.length === 0 && incomingFormations.length === 0) {
+                        showToast("유효한 전술 데이터가 포함되어 있지 않습니다.", "error");
+                        return;
+                    }
+
+                    // 전술 목록 병합
+                    const localTactData = localStorage.getItem('victory_road_tactics');
+                    const currentTactList = localTactData ? JSON.parse(localTactData) : [];
+                    const mergedTactMap = new Map();
+                    currentTactList.forEach(item => mergedTactMap.set(item.id, item));
+                    incomingTactics.forEach(item => {
+                        if (item && item.title) {
+                            mergedTactMap.set(item.id || Date.now().toString() + Math.random(), item);
+                        }
+                    });
+                    const finalTactList = Array.from(mergedTactMap.values());
+                    localStorage.setItem('victory_road_tactics', JSON.stringify(finalTactList));
+                    fetchSavedTacticsList();
+
+                    // 포메이션 목록 병합
+                    if (incomingFormations.length > 0) {
+                        const localFormData = localStorage.getItem('victory_road_formations');
+                        const currentFormList = localFormData ? JSON.parse(localFormData) : [];
+                        const mergedFormMap = new Map();
+                        currentFormList.forEach(item => mergedFormMap.set(item.id, item));
+                        incomingFormations.forEach(item => {
+                            if (item && item.title) {
+                                mergedFormMap.set(item.id || Date.now().toString() + Math.random(), item);
+                            }
+                        });
+                        const finalFormList = Array.from(mergedFormMap.values());
+                        localStorage.setItem('victory_road_formations', JSON.stringify(finalFormList));
+                        fetchSavedFormationsList();
+                    }
+
+                    // 첫 번째 전술 화면에 즉시 로드
+                    if (incomingTactics.length > 0) {
+                        handleLoadTactics(incomingTactics[0]);
+                    }
+
+                    showToast(`전체 백업에서 전술 ${incomingTactics.length}개, 포메이션 ${incomingFormations.length}개를 성공적으로 복원했습니다!`, "success");
+                }
+                // C. 호환성 지원: 일반 전술 JSON 객체 직접 인식
+                else if (parsed.formation || parsed.squad || parsed.positions) {
+                    const validTactic = {
+                        id: parsed.id || `imported_${Date.now()}`,
+                        title: parsed.title || file.name.replace(/\.json$/i, '') || '불러온 전술',
+                        formation: parsed.formation || '4-4-2',
+                        squad: parsed.squad || {},
+                        bench: parsed.bench || {},
+                        coach: parsed.coach || null,
+                        positions: parsed.positions || FORMATIONS[parsed.formation] || FORMATIONS['4-4-2'],
+                        createdAt: parsed.createdAt || new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    handleLoadTactics(validTactic);
+
+                    const localData = localStorage.getItem('victory_road_tactics');
+                    const currentList = localData ? JSON.parse(localData) : [];
+                    localStorage.setItem('victory_road_tactics', JSON.stringify([validTactic, ...currentList.filter(t => t.id !== validTactic.id)]));
+                    fetchSavedTacticsList();
+
+                    showToast(`"${validTactic.title}" 전술을 성공적으로 불러왔습니다!`, "success");
+                }
+                else {
+                    showToast("지원되지 않거나 손상된 이나즈마 전술 파일 형식입니다.", "error");
+                }
+            } catch (err) {
+                console.error("파일 파싱 에러:", err);
+                showToast("JSON 파일 해석 중 오류가 발생했습니다. 올바른 파일인지 확인해 주세요.", "error");
+            }
+        };
+
+        reader.readAsText(file, 'utf-8');
+    };
+
     return (
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 1.25rem' }}>
             
@@ -1005,6 +1276,53 @@ export default function Tactics() {
                                 {(editingFormationId || savedFormations.some(f => f.title.trim().toLowerCase() === tacticsTitle.trim().toLowerCase() && tacticsTitle.trim())) 
                                     ? '대형 수정' 
                                     : '대형 저장'}
+                            </button>
+
+                            {/* 📥 파일 불러오기 숨김 input 및 버튼 */}
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                accept=".json" 
+                                onChange={handleImportFile} 
+                                style={{ display: 'none' }} 
+                            />
+                            <button 
+                                className="btn btn-secondary"
+                                style={{ 
+                                    padding: '0.45rem 0.75rem', 
+                                    fontSize: '0.72rem', 
+                                    borderRadius: '10px', 
+                                    background: 'transparent', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.35rem',
+                                    fontWeight: 700 
+                                }}
+                                onClick={handleTriggerFileInput}
+                                title="JSON 전술 파일 또는 백업 파일을 불러옵니다"
+                            >
+                                <Upload size={13} color="var(--primary-color)" />
+                                파일 불러오기
+                            </button>
+
+                            {/* 📤 현재 전술 파일 내보내기 버튼 */}
+                            <button 
+                                className="btn btn-secondary"
+                                style={{ 
+                                    padding: '0.45rem 0.75rem', 
+                                    fontSize: '0.72rem', 
+                                    borderRadius: '10px', 
+                                    background: 'transparent', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.35rem',
+                                    fontWeight: 700 
+                                }}
+                                onClick={handleExportCurrentTactics}
+                                title="현재 작성 중인 전술을 JSON 파일로 내보냅니다"
+                            >
+                                <Download size={13} color="var(--accent-color)" />
+                                파일 내보내기
                             </button>
                         </div>
 
@@ -1533,16 +1851,41 @@ export default function Tactics() {
                                     포메이션 팩
                                 </button>
                             </div>
-                            <button 
-                                onClick={() => {
-                                    fetchSavedTacticsList();
-                                    fetchSavedFormationsList();
-                                }}
-                                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                                title="로컬 라이브러리 새로고침"
-                            >
-                                <RefreshCw size={14} className={isFetchingList ? 'spin-animation' : ''} />
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                <button 
+                                    onClick={handleExportAllBackup}
+                                    style={{
+                                        background: 'rgba(100, 116, 139, 0.08)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        padding: '0.3rem 0.55rem',
+                                        fontSize: '0.68rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        color: 'var(--text-main)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.25rem',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                                    onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                                    title="저장된 모든 전술과 포메이션을 한 번에 JSON 백업 파일로 내보냅니다"
+                                >
+                                    <Download size={11} />
+                                    전체 백업
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        fetchSavedTacticsList();
+                                        fetchSavedFormationsList();
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                                    title="로컬 라이브러리 새로고침"
+                                >
+                                    <RefreshCw size={14} className={isFetchingList ? 'spin-animation' : ''} />
+                                </button>
+                            </div>
                         </div>
 
                         {/* 리스트 목록 뷰포트 (호버 시 그림자가 잘리지 않도록 4방향 여유 패딩 및 하단 여백 적용) */}
@@ -1564,7 +1907,7 @@ export default function Tactics() {
                                                 <div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
                                                         <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                                                            {tact.title}
+                                                             {tact.title}
                                                         </h3>
                                                         {isEditing && (
                                                             <span style={{ fontSize: '0.62rem', background: 'var(--primary-color)', color: '#fff', padding: '1px 5px', borderRadius: '6px', fontWeight: 800 }}>
@@ -1578,21 +1921,40 @@ export default function Tactics() {
                                                         {tact.updatedAt && tact.updatedAt !== tact.createdAt && ' (수정됨)'}
                                                     </span>
                                                 </div>
-                                                <button 
-                                                    onClick={(e) => handleDeleteTactics(tact.id, e)}
-                                                    style={{
-                                                        background: 'transparent',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        color: 'var(--text-muted)',
-                                                        padding: '4px',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
-                                                    onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+                                                    <button 
+                                                        onClick={(e) => handleExportSingleSavedTactics(tact, e)}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            color: 'var(--text-muted)',
+                                                            padding: '4px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseOver={e => e.currentTarget.style.color = 'var(--primary-color)'}
+                                                        onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                        title="이 전술을 JSON 파일로 다운로드"
+                                                    >
+                                                        <Download size={13} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => handleDeleteTactics(tact.id, e)}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            color: 'var(--text-muted)',
+                                                            padding: '4px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
+                                                        onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                        title="전술 삭제"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         );
                                     })
@@ -1631,21 +1993,40 @@ export default function Tactics() {
                                                         {form.updatedAt && form.updatedAt !== form.createdAt && ' (수정됨)'}
                                                     </span>
                                                 </div>
-                                                <button 
-                                                    onClick={(e) => handleDeleteFormationOnly(form.id, e)}
-                                                    style={{
-                                                        background: 'transparent',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        color: 'var(--text-muted)',
-                                                        padding: '4px',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
-                                                    onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+                                                    <button 
+                                                        onClick={(e) => handleExportSingleSavedFormation(form, e)}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            color: 'var(--text-muted)',
+                                                            padding: '4px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseOver={e => e.currentTarget.style.color = 'var(--primary-color)'}
+                                                        onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                        title="이 포메이션 대형을 JSON 파일로 다운로드"
+                                                    >
+                                                        <Download size={13} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => handleDeleteFormationOnly(form.id, e)}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            color: 'var(--text-muted)',
+                                                            padding: '4px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseOver={e => e.currentTarget.style.color = '#EF4444'}
+                                                        onMouseOut={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                                                        title="포메이션 삭제"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         );
                                     })
