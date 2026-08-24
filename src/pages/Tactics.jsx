@@ -156,6 +156,20 @@ export default function Tactics() {
     const [savedFormations, setSavedFormations] = useState([]);           // 고도화: 저장된 포메이션 좌표셋 리스트
     const [editingTacticsId, setEditingTacticsId] = useState(null);       // 현재 수정 중인 전술 ID
     const [editingFormationId, setEditingFormationId] = useState(null);   // 현재 수정 중인 포메이션 ID
+    const editingTacticsIdRef = useRef(null);                             // 비동기 타이머 클로저 이슈 방지용 실시간 ref
+    const editingFormationIdRef = useRef(null);                           // 비동기 타이머 클로저 이슈 방지용 실시간 ref
+
+    // 수정 중인 ID를 State와 Ref에 0ms로 즉각 동기화하는 헬퍼 함수
+    const updateEditingTacticsId = (id) => {
+        editingTacticsIdRef.current = id;
+        setEditingTacticsId(id);
+    };
+
+    const updateEditingFormationId = (id) => {
+        editingFormationIdRef.current = id;
+        setEditingFormationId(id);
+    };
+
     const [archiveTab, setArchiveTab] = useState('tactics');             // 아카이브 탭 전환 상태 ('tactics' / 'formations')
     const [isSaving, setIsSaving] = useState(false);
     const [isFetchingList, setIsFetchingList] = useState(false);
@@ -474,7 +488,7 @@ export default function Tactics() {
     };
 
     // ⚡ 실시간 자동 수정(Auto-Save) 훅:
-    // 사용자가 불러와서 현재 수정 중인 항목(editingTacticsId 또는 editingFormationId)이 있을 때만
+    // 사용자가 불러와서 현재 수정 중인 항목(editingTacticsIdRef.current 또는 editingFormationIdRef.current)이 있을 때만
     // 사용자의 직접 조작(isDirtyRef.current === true)을 500ms 디바운스로 로컬스토리지에 안전하게 자동 덮어씁니다.
     // 신규 작성 모드이거나 단순 조회 시에는 다른 기존 전술로 강제 이동되거나 덮어쓰지 않습니다.
     useEffect(() => {
@@ -488,11 +502,7 @@ export default function Tactics() {
         if (!isDirtyRef.current || !isAutoSave) return;
 
         // 수정 중인 ID가 전혀 없는 신규 작성 상태면 기존 전술을 멋대로 덮어쓰지 않도록 차단
-        if (!editingTacticsId && !editingFormationId) return;
-
-        const currentEditingId = editingTacticsId;
-        const currentEditingFormId = editingFormationId;
-        const title = tacticsTitle.trim();
+        if (!editingTacticsIdRef.current && !editingFormationIdRef.current) return;
 
         if (autoSaveTimerRef.current) {
             clearTimeout(autoSaveTimerRef.current);
@@ -502,13 +512,17 @@ export default function Tactics() {
             // 실행 직전 한 번 더 isDirty 확인
             if (!isDirtyRef.current) return;
 
+            const activeEditingId = editingTacticsIdRef.current;
+            const activeEditingFormId = editingFormationIdRef.current;
+            const title = tacticsTitle.trim();
+
             try {
-                if (currentEditingId) {
+                if (activeEditingId) {
                     // [전술 팩 자동 수정]
                     const localData = localStorage.getItem('victory_road_tactics');
                     const currentList = localData ? JSON.parse(localData) : [];
 
-                    const existingIndex = currentList.findIndex(item => item.id === currentEditingId);
+                    const existingIndex = currentList.findIndex(item => item.id === activeEditingId);
 
                     if (existingIndex !== -1) {
                         setAutoSaveStatus('saving');
@@ -537,12 +551,12 @@ export default function Tactics() {
                             setAutoSaveStatus('idle');
                         }, 2500);
                     }
-                } else if (currentEditingFormId) {
+                } else if (activeEditingFormId) {
                     // [포메이션 팩 자동 수정]
                     const localData = localStorage.getItem('victory_road_formations');
                     const currentList = localData ? JSON.parse(localData) : [];
 
-                    const existingIndex = currentList.findIndex(item => item.id === currentEditingFormId);
+                    const existingIndex = currentList.findIndex(item => item.id === activeEditingFormId);
 
                     if (existingIndex !== -1) {
                         setAutoSaveStatus('saving');
@@ -583,7 +597,7 @@ export default function Tactics() {
     // ✨ 스마트 포메이션 자동 정렬 / 중앙 보정 기능
     const handleAutoAlignPositions = () => {
         // 수정 중인 전술이나 포메이션이 있는 경우에만 자동 저장 큐에 플래그 설정
-        if (editingTacticsId || editingFormationId) {
+        if (editingTacticsIdRef.current || editingFormationIdRef.current) {
             isDirtyRef.current = true;
         }
         setPositions(prevPositions => {
@@ -603,8 +617,8 @@ export default function Tactics() {
         if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
         isDirtyRef.current = false; // 리셋 시 더티 플래그 해제
         setAutoSaveStatus('idle');
-        setEditingTacticsId(null);
-        setEditingFormationId(null);
+        updateEditingTacticsId(null);
+        updateEditingFormationId(null);
         setTacticsTitle('');
         setSquad({});
         setBench({});
@@ -630,7 +644,7 @@ export default function Tactics() {
 
             // 1. 현재 불러와서 수정 중인 전술 ID가 있거나, 또는 입력한 이름과 똑같은 기존 전술이 있는지 확인합니다.
             const existingIndex = currentList.findIndex(item => 
-                (editingTacticsId && item.id === editingTacticsId) || 
+                (editingTacticsIdRef.current && item.id === editingTacticsIdRef.current) || 
                 item.title.trim().toLowerCase() === title.toLowerCase()
             );
 
@@ -653,7 +667,7 @@ export default function Tactics() {
 
                 nextList = [...currentList];
                 nextList[existingIndex] = updatedItem;
-                setEditingTacticsId(targetItem.id); // 수정 모드 유지
+                updateEditingTacticsId(targetItem.id); // 수정 모드 유지 (ref 동기화)
                 isUpdate = true;
             } else {
                 // [새 전술 신규 저장 모드]: 기존에 없는 이름이므로 새로운 전술 아이템으로 등록합니다.
@@ -670,7 +684,7 @@ export default function Tactics() {
                 };
 
                 nextList = [newTacticsItem, ...currentList];
-                setEditingTacticsId(newTacticsItem.id); // 저장 후에도 수정 모드로 전환
+                updateEditingTacticsId(newTacticsItem.id); // 저장 후에도 수정 모드로 전환 (ref 동기화)
                 isUpdate = false;
             }
 
@@ -698,6 +712,8 @@ export default function Tactics() {
         isDirtyRef.current = false; // 전술 로드 시에는 자동 수정을 절대 트리거하지 않도록 차단!
         setAutoSaveStatus('idle');
         
+        updateEditingTacticsId(tactics.id);       // 현재 수정 중인 전술 ID 등록 (ref 동기화)
+        updateEditingFormationId(null);           // 포메이션 수정 모드는 해제 (ref 동기화)
         setSelectedFormation(tactics.formation);
         setSquad(tactics.squad || {});
         setBench(tactics.bench || {});
@@ -705,8 +721,6 @@ export default function Tactics() {
         // 개별 좌표가 저장되어 있으면 로드하고, 없으면 포메이션 기본값 사용
         setPositions(tactics.positions || FORMATIONS[tactics.formation]);
         setTacticsTitle(tactics.title);
-        setEditingTacticsId(tactics.id);       // 현재 수정 중인 전술 ID 등록
-        setEditingFormationId(null);           // 포메이션 수정 모드는 해제
         showToast(`"${tactics.title}" 전술을 불러왔습니다. (수정 모드)`, "success");
     };
 
@@ -726,8 +740,8 @@ export default function Tactics() {
                     localStorage.setItem('victory_road_tactics', JSON.stringify(nextList));
                     
                     // 만약 현재 수정 중이던 전술이 삭제되었다면 수정 모드 해제
-                    if (editingTacticsId === tacticsId) {
-                        setEditingTacticsId(null);
+                    if (editingTacticsIdRef.current === tacticsId) {
+                        updateEditingTacticsId(null);
                     }
                     
                     fetchSavedTacticsList();
@@ -755,7 +769,7 @@ export default function Tactics() {
 
             // 기존 동일 이름 또는 수정 중인 포메이션 검사
             const existingIndex = currentList.findIndex(item => 
-                (editingFormationId && item.id === editingFormationId) || 
+                (editingFormationIdRef.current && item.id === editingFormationIdRef.current) || 
                 item.title.trim().toLowerCase() === title.toLowerCase()
             );
 
@@ -775,7 +789,7 @@ export default function Tactics() {
 
                 nextList = [...currentList];
                 nextList[existingIndex] = updatedItem;
-                setEditingFormationId(targetItem.id);
+                updateEditingFormationId(targetItem.id); // ref 동기화
                 isUpdate = true;
             } else {
                 // 새로운 포메이션 대형 추가
@@ -789,7 +803,7 @@ export default function Tactics() {
                 };
 
                 nextList = [newFormItem, ...currentList];
-                setEditingFormationId(newFormItem.id);
+                updateEditingFormationId(newFormItem.id); // ref 동기화
                 isUpdate = false;
             }
 
@@ -815,11 +829,11 @@ export default function Tactics() {
         if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
         isDirtyRef.current = false; // 로드 시에는 자동 수정 트리거 방지
         setAutoSaveStatus('idle');
-        setEditingTacticsId(null); // 전술 수정 ID 확실히 해제
+        updateEditingTacticsId(null);         // 전술 수정 ID 확실히 해제 (ref 동기화)
+        updateEditingFormationId(formItem.id); // 포메이션 수정 모드 등록 (ref 동기화)
         setPositions(formItem.positions || FORMATIONS['4-4-2']);
         setSelectedFormation('커스텀');
         setTacticsTitle(formItem.title);
-        setEditingFormationId(formItem.id); // 포메이션 수정 모드 등록
         showToast(`"${formItem.title}" 포메이션 대형을 불러왔습니다. (선수 배치 유지)`, "success");
     };
 
@@ -838,15 +852,15 @@ export default function Tactics() {
                     const nextList = currentList.filter(item => item.id !== formId);
                     localStorage.setItem('victory_road_formations', JSON.stringify(nextList));
                     
-                    if (editingFormationId === formId) {
-                        setEditingFormationId(null);
+                    if (editingFormationIdRef.current === formId) {
+                        updateEditingFormationId(null);
                     }
                     
                     fetchSavedFormationsList();
-                    showToast("포메이션 대형이 성공적으로 삭제되었습니다.", "success");
+                    showToast("포메이션 대형이 삭제되었습니다.", "success");
                 } catch (error) {
                     console.error("포메이션 삭제 에러:", error);
-                    showToast("삭제하는 중 에러가 발생했습니다.", "error");
+                    showToast("삭제하는 과정에서 에러가 발생했습니다.", "error");
                 }
             }
         });
