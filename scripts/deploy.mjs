@@ -28,6 +28,12 @@ function run(cmd, cwd = distPath) {
   }
 }
 
+// Jekyll 처리 비활성화 (.nojekyll) 및 SPA 404 리다이렉트 (404.html) 보장
+fs.writeFileSync(path.join(distPath, '.nojekyll'), '', 'utf8');
+if (fs.existsSync(path.join(distPath, 'index.html'))) {
+  fs.copyFileSync(path.join(distPath, 'index.html'), path.join(distPath, '404.html'));
+}
+
 try {
   run('git init');
   run('git checkout -B gh-pages');
