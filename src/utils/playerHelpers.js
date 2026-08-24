@@ -552,6 +552,8 @@ export function refineTranslation(text) {
     { pattern: /진심으로 따르고 있다/g, replace: '마음속 깊이 따르고 있다' },
 
     // 15. 준족(빠른 발) 및 필드 질주 묘사 정밀 교정 (사용자 피드백 보완)
+    { pattern: /뒤뒤지지/g, replace: '뒤지지' },
+    { pattern: /뒤뒤지/g, replace: '뒤지' },
     { pattern: /슌족을/g, replace: '빠른 발을' },
     { pattern: /슌족의/g, replace: '빠른 발의' },
     { pattern: /슌족/g, replace: '빠른 발' },

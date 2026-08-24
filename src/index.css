@@ -1349,3 +1349,13 @@ a:hover {
     border-radius: 50% !important;
   }
 }
+
+/* 회전 애니메이션 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
