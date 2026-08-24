@@ -1060,19 +1060,19 @@ a:hover {
 }
 
 .tactics-left-bench-section {
-  width: 104px;
+  width: 124px;
   flex-shrink: 0;
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   border: var(--card-border);
   border-radius: 18px;
-  padding: 0.9rem 0.6rem 1.2rem 0.6rem;
+  padding: 1rem 0.75rem 1.4rem 0.75rem;
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
   box-shadow: var(--soft-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
   height: auto; /* 스크롤 없이 후보 7명 전체가 시원하게 펼쳐짐 */
 }
 
@@ -1080,12 +1080,12 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   width: 100%;
 }
 
 .tactics-bench-group-title {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: var(--text-muted);
   letter-spacing: -0.5px;
@@ -1097,14 +1097,14 @@ a:hover {
   width: 90%;
   height: 1px;
   background: var(--border-color);
-  margin: 0.1rem 0;
+  margin: 0.2rem 0;
 }
 
 .tactics-left-subs-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   width: 100%;
 }
 
@@ -1112,15 +1112,15 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   width: 100%;
   overflow-y: visible; /* 스크롤바 제거 */
   padding: 0.2rem 0.1rem;
 }
 
 .tactics-bench-card {
-  width: 68px !important;
-  height: 82px !important;
+  width: 82px !important;
+  height: 96px !important;
   flex-shrink: 0;
   cursor: pointer;
   position: relative;
@@ -1145,15 +1145,15 @@ a:hover {
 }
 
 .tactics-bench-card-empty {
-  width: 68px !important;
-  height: 82px !important;
+  width: 82px !important;
+  height: 96px !important;
   flex-shrink: 0;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
   cursor: pointer;
   transition: all 0.25s ease;
 }
