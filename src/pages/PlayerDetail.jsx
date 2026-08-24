@@ -22,7 +22,18 @@ export default function PlayerDetail() {
 
   // 선수의 일어 설명을 감지해 한글로 실시간 번역해 주는 3중 Fallback 튜닝 함수
   const loadTranslation = async (forceRefresh = false) => {
-    if (!player || !player.description) {
+    if (!player) {
+      setTranslatedDesc('');
+      return;
+    }
+
+    // 1순위: 5,407명 전수 번역 데이터베이스(description_ko) 즉시 활용 (0초 로딩)
+    if (player.description_ko && !forceRefresh) {
+      setTranslatedDesc(refineTranslation(player.description_ko));
+      return;
+    }
+
+    if (!player.description) {
       setTranslatedDesc('');
       return;
     }
@@ -36,7 +47,7 @@ export default function PlayerDetail() {
       return;
     }
 
-    const cacheKey = `inazuma_trans_v5_${player.id}`;
+    const cacheKey = `inazuma_trans_v6_${player.id}`;
     if (!forceRefresh) {
       try {
         const cached = localStorage.getItem(cacheKey);
