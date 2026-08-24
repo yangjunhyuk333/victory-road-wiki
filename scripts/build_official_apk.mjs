@@ -132,9 +132,11 @@ function copyRecursive(src, dest) {
     if (stats.isDirectory()) {
         if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
         for (const file of fs.readdirSync(src)) {
+            if (file.endsWith('.apk') || file.endsWith('.zip') || file.endsWith('.exe')) continue;
             copyRecursive(path.join(src, file), path.join(dest, file));
         }
     } else {
+        if (src.endsWith('.apk') || src.endsWith('.zip') || src.endsWith('.exe')) return;
         fs.copyFileSync(src, dest);
     }
 }
