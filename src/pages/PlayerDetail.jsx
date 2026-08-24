@@ -20,45 +20,79 @@ export default function PlayerDetail() {
   // 번역된 소속 팀 목록을 저장할 상태를 선언합니다.
   const [translatedTeams, setTranslatedTeams] = useState([]);
 
-  // 선수의 일어 설명을 감지해 한글로 실시간 번역해 주는 오리지널 튜닝 함수
-  const loadTranslation = (forceRefresh = false) => {
+  // 선수의 일어 설명을 감지해 한글로 실시간 번역해 주는 3중 Fallback 튜닝 함수
+  const loadTranslation = async (forceRefresh = false) => {
     if (!player || !player.description) {
       setTranslatedDesc('');
       return;
     }
 
+    const jaText = player.description.trim();
+
     // 이미 설명 내에 한글 텍스트 자모가 믹스되어 있는 경우 번역을 건너뜁니다.
-    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(player.description);
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(jaText);
     if (hasKorean) {
-      setTranslatedDesc(refineTranslation(player.description));
+      setTranslatedDesc(refineTranslation(jaText));
       return;
     }
 
-    setIsTranslating(true);
-    const jaText = player.description;
-
-    // 무료 CORS 우회 구글 번역 API 엔드포인트 (client=gtx)를 호출합니다.
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=ko&dt=t&q=${encodeURIComponent(jaText)}`;
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data[0]) {
-          // 각 줄(청크) 단위의 번역 텍스트 결과 배열을 하나의 통합 스트링으로 합칩니다.
-          const translated = data[0].map(item => item[0]).join('');
-          // 구글 기계 번역 결과의 어색한 어휘들을 헬퍼 필터를 통해 매끄러운 한글 어투로 최종 정제합니다.
-          setTranslatedDesc(refineTranslation(translated));
-        } else {
-          setTranslatedDesc(refineTranslation(jaText));
+    const cacheKey = `inazuma_trans_v2_${player.id}`;
+    if (!forceRefresh) {
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(cached)) {
+          setTranslatedDesc(cached);
+          return;
         }
-      })
-      .catch(err => {
-        console.error("인게임 상세 정보 실시간 번역 오류 발생:", err);
-        setTranslatedDesc(refineTranslation(jaText)); // 예외 발생 시 원본 일어라도 정제하여 출력
-      })
-      .finally(() => {
-        setIsTranslating(false);
-      });
+      } catch (e) {}
+    }
+
+    setIsTranslating(true);
+    let translated = '';
+
+    // 1단계: Google Translate 무료 엔드포인트
+    try {
+      const gUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ja&tl=ko&dt=t&q=${encodeURIComponent(jaText)}`;
+      const res = await fetch(gUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data[0]) {
+          translated = data[0].map(item => item[0]).join('');
+        }
+      }
+    } catch (err) {
+      console.warn("구글 1차 번역 실패, 백업 번역 엔진으로 전환합니다:", err);
+    }
+
+    // 2단계: MyMemory 번역 엔진 (구글 차단 시 Fallback)
+    if (!translated || !/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(translated)) {
+      try {
+        const myMemoryUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(jaText)}&langpair=ja|ko`;
+        const res = await fetch(myMemoryUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.responseData && data.responseData.translatedText) {
+            translated = data.responseData.translatedText;
+          }
+        }
+      } catch (err) {
+        console.warn("MyMemory 번역 실패:", err);
+      }
+    }
+
+    // 최종 번역 결과 처리 및 15단계 정밀 튜닝 필터 적용
+    if (translated && /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(translated)) {
+      const refined = refineTranslation(translated);
+      setTranslatedDesc(refined);
+      try {
+        localStorage.setItem(cacheKey, refined);
+      } catch (e) {}
+    } else {
+      // 모든 번역 엔진 실패 시 원본 일어 정제 출력
+      setTranslatedDesc(refineTranslation(jaText));
+    }
+
+    setIsTranslating(false);
   };
 
   useEffect(() => {
