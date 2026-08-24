@@ -28,13 +28,13 @@
   --backdrop-blur: none;  
   --transition-speed: 0.2s;
 
-  /* 경기장 및 선수 카드 크기 제어용 반응형 변수 설계 (PC 기본) */
-  --field-max-width: 780px;
-  --card-w: 84px;
-  --card-h: 112px;
-  --card-font: 0.75rem;
-  --avatar-size: 54px;
-  --empty-font: 0.62rem;
+  /* 경기장 및 선수 카드 크기 제어용 반응형 변수 설계 (PC 기본 - 시원하고 웅장한 전술판) */
+  --field-max-width: 960px;
+  --card-w: 92px;
+  --card-h: 122px;
+  --card-font: 0.82rem;
+  --avatar-size: 60px;
+  --empty-font: 0.68rem;
 }
 
 [data-theme="dark"] {
@@ -60,25 +60,36 @@
 }
 
 /* 다단계 반응형 뷰포트에 따른 동적 스케일 제어 */
+@media (max-width: 1400px) {
+  :root {
+    --field-max-width: 860px;
+    --card-w: 86px;
+    --card-h: 114px;
+    --card-font: 0.78rem;
+    --avatar-size: 56px;
+    --empty-font: 0.64rem;
+  }
+}
+
 @media (max-width: 1200px) {
   :root {
-    --field-max-width: 680px;
-    --card-w: 76px;
-    --card-h: 102px;
-    --card-font: 0.7rem;
-    --avatar-size: 48px;
-    --empty-font: 0.58rem;
+    --field-max-width: 760px;
+    --card-w: 80px;
+    --card-h: 106px;
+    --card-font: 0.72rem;
+    --avatar-size: 50px;
+    --empty-font: 0.6rem;
   }
 }
 
 @media (max-width: 992px) {
   :root {
-    --field-max-width: 600px;
-    --card-w: 70px;
-    --card-h: 94px;
-    --card-font: 0.66rem;
+    --field-max-width: 650px;
+    --card-w: 72px;
+    --card-h: 96px;
+    --card-font: 0.68rem;
     --avatar-size: 44px;
-    --empty-font: 0.54rem;
+    --empty-font: 0.56rem;
   }
 }
 
@@ -567,7 +578,7 @@ a:hover {
 .field-center-circle {
   position: absolute;
   top: 50%; left: 50%;
-  width: 80px; height: 80px;
+  width: 100px; height: 100px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -577,7 +588,7 @@ a:hover {
 .field-penalty-top {
   position: absolute;
   top: 0; left: 50%;
-  width: 180px; height: 70px;
+  width: 220px; height: 85px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-top: none;
   transform: translateX(-50%);
@@ -587,7 +598,7 @@ a:hover {
 .field-penalty-bottom {
   position: absolute;
   bottom: 0; left: 50%;
-  width: 180px; height: 70px;
+  width: 220px; height: 85px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-bottom: none;
   transform: translateX(-50%);
@@ -597,7 +608,7 @@ a:hover {
 .field-goal-top {
   position: absolute;
   top: 0; left: 50%;
-  width: 90px; height: 25px;
+  width: 110px; height: 35px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-top: none;
   transform: translateX(-50%);
@@ -607,7 +618,7 @@ a:hover {
 .field-goal-bottom {
   position: absolute;
   bottom: 0; left: 50%;
-  width: 90px; height: 25px;
+  width: 110px; height: 35px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-bottom: none;
   transform: translateX(-50%);

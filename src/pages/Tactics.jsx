@@ -836,7 +836,7 @@ export default function Tactics() {
     };
 
     return (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
             
             {/* 1. 에디터 타이틀 상단 바 */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.25rem' }}>
