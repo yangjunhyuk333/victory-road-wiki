@@ -1053,150 +1053,9 @@ export default function Tactics() {
 
                     </div>
 
-                    {/* 축구장 및 좌측 벤치 래퍼 */}
-                    <div className="tactics-field-workspace">
+                    {/* 축구장 및 하단 벤치 래퍼 */}
+                    <div className="tactics-field-workspace" style={{ flexDirection: 'column' }}>
                         
-                        {/* 2.1.1 좌측 세로형 감독 & 벤치(후보 7인) 사이드 랙 */}
-                        <div className="glass-card tactics-left-bench-section">
-                            
-                            {/* 감독(Coach) 슬롯 영역 */}
-                            <div className="tactics-left-coach-container">
-                                <span className="tactics-bench-group-title">👔 감독 (Coach)</span>
-                                {coach ? (
-                                    <div 
-                                        className="tactics-card tactics-bench-card tactics-coach-card"
-                                        onClick={() => handleSlotClick('coach')}
-                                    >
-                                        <span className="tactics-card-badge-pos" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: '1.5px solid #fff', fontSize: '0.58rem', padding: '1px 5px' }}>
-                                            👑 감독
-                                        </span>
-                                        {coach.element && (
-                                            <span className="tactics-card-badge-elem">
-                                                {getElementIcon(coach.element)}
-                                            </span>
-                                        )}
-                                        <div className="tactics-card-avatar">
-                                            {coach.image ? (
-                                                <img 
-                                                    src={coach.image} 
-                                                    alt={coach.name}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div style={{
-                                                display: coach.image ? 'none' : 'flex',
-                                                width: '100%', height: '100%',
-                                                alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '1.4rem', fontWeight: 800,
-                                                color: 'var(--text-muted)'
-                                            }}>
-                                                {coach.name.charAt(0)}
-                                            </div>
-                                        </div>
-                                        <div className="tactics-card-info">
-                                            {coach.name}
-                                        </div>
-                                        <button
-                                            onClick={(e) => handleClearSlot('coach', e)}
-                                            className="tactics-card-clear-btn"
-                                            title="감독 해임/비우기"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div 
-                                        className="tactics-card-empty tactics-bench-card-empty"
-                                        onClick={() => handleSlotClick('coach')}
-                                        title="클릭하여 감독을 선임합니다"
-                                    >
-                                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
-                                        <span className="tactics-card-empty-role" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
-                                            감독 선임
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* 세로 구분선 */}
-                            <div className="tactics-left-divider"></div>
-
-                            {/* 벤치 후보 선수들 (SUB 1 ~ 7 세로 나열) */}
-                            <div className="tactics-left-subs-container">
-                                <span className="tactics-bench-group-title">💺 후보 (7인)</span>
-                                <div className="tactics-left-subs-grid custom-scrollbar">
-                                    {[0, 1, 2, 3, 4, 5, 6].map((subIdx) => {
-                                        const subSlotKey = `bench_${subIdx}`;
-                                        const subPlayer = bench[subIdx];
-
-                                        return subPlayer ? (
-                                            <div 
-                                                key={subIdx}
-                                                className="tactics-card tactics-bench-card"
-                                                onClick={() => handleSlotClick(subSlotKey)}
-                                            >
-                                                <span className="tactics-card-badge-pos" style={{ background: '#64748B', border: '1.5px solid #fff' }}>
-                                                    {subPlayer.position || `SUB ${subIdx + 1}`}
-                                                </span>
-                                                {subPlayer.element && (
-                                                    <span className="tactics-card-badge-elem">
-                                                        {getElementIcon(subPlayer.element)}
-                                                    </span>
-                                                )}
-                                                <div className="tactics-card-avatar">
-                                                    {subPlayer.image ? (
-                                                        <img 
-                                                            src={subPlayer.image} 
-                                                            alt={subPlayer.name}
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none';
-                                                                e.target.nextSibling.style.display = 'flex';
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <div style={{
-                                                        display: subPlayer.image ? 'none' : 'flex',
-                                                        width: '100%', height: '100%',
-                                                        alignItems: 'center', justifyContent: 'center',
-                                                        fontSize: '1.4rem', fontWeight: 800,
-                                                        color: 'var(--text-muted)'
-                                                    }}>
-                                                        {subPlayer.name.charAt(0)}
-                                                    </div>
-                                                </div>
-                                                <div className="tactics-card-info">
-                                                    {subPlayer.name}
-                                                </div>
-                                                <button
-                                                    onClick={(e) => handleClearSlot(subSlotKey, e)}
-                                                    className="tactics-card-clear-btn"
-                                                    title="후보 선수 비우기"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div 
-                                                key={subIdx}
-                                                className="tactics-card-empty tactics-bench-card-empty"
-                                                onClick={() => handleSlotClick(subSlotKey)}
-                                                title={`후보 ${subIdx + 1} 선수 등록`}
-                                            >
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
-                                                <span className="tactics-card-empty-role">
-                                                    SUB {subIdx + 1}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                        </div>
-
                         {/* 2.1.2 축구장 보드 (미니멀 평면 전술판 스타일) */}
                         <div ref={fieldRef} className="soccer-field-container" style={{ outline: 'none' }}>
                             {/* 축구장 내부 무늬 및 라인 레이어 */}
@@ -1433,6 +1292,149 @@ export default function Tactics() {
                                     </div>
                                 );
                             })}
+                        </div>
+
+                        {/* 2.1.2 하단 감독 & 벤치(후보 7인) 섹션 (넉넉하고 큼직한 가로 랙) */}
+                        <div className="glass-card tactics-sub-bench-section" style={{ width: '100%', maxWidth: 'var(--field-max-width)', marginTop: '0.6rem' }}>
+                            <div className="tactics-bench-wrapper">
+                                
+                                {/* 감독(Coach) 슬롯 영역 */}
+                                <div className="tactics-coach-slot-container">
+                                    <span className="tactics-bench-group-title">👔 감독 (Coach)</span>
+                                    {coach ? (
+                                        <div 
+                                            className="tactics-card tactics-bench-card tactics-coach-card"
+                                            onClick={() => handleSlotClick('coach')}
+                                        >
+                                            <span className="tactics-card-badge-pos" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', border: '1.5px solid #fff', fontSize: '0.62rem', padding: '1px 5px' }}>
+                                                👑 감독
+                                            </span>
+                                            {coach.element && (
+                                                <span className="tactics-card-badge-elem">
+                                                    {getElementIcon(coach.element)}
+                                                </span>
+                                            )}
+                                            <div className="tactics-card-avatar">
+                                                {coach.image ? (
+                                                    <img 
+                                                        src={coach.image} 
+                                                        alt={coach.name}
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <div style={{
+                                                    display: coach.image ? 'none' : 'flex',
+                                                    width: '100%', height: '100%',
+                                                    alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '1.4rem', fontWeight: 800,
+                                                    color: 'var(--text-muted)'
+                                                }}>
+                                                    {coach.name.charAt(0)}
+                                                </div>
+                                            </div>
+                                            <div className="tactics-card-info">
+                                                {coach.name}
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleClearSlot('coach', e)}
+                                                className="tactics-card-clear-btn"
+                                                title="감독 해임/비우기"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="tactics-card-empty tactics-bench-card-empty"
+                                            onClick={() => handleSlotClick('coach')}
+                                            title="클릭하여 감독을 선임합니다"
+                                        >
+                                            <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>+</span>
+                                            <span className="tactics-card-empty-role" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+                                                감독 선임
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 세로 구분선 */}
+                                <div className="tactics-bench-divider"></div>
+
+                                {/* 벤치 후보 선수들 (SUB 1 ~ 7 가로 나열) */}
+                                <div className="tactics-sub-slots-container">
+                                    <span className="tactics-bench-group-title">💺 후보 (7인)</span>
+                                    <div className="tactics-sub-slots-grid custom-scrollbar">
+                                        {[0, 1, 2, 3, 4, 5, 6].map((subIdx) => {
+                                            const subSlotKey = `bench_${subIdx}`;
+                                            const subPlayer = bench[subIdx];
+
+                                            return subPlayer ? (
+                                                <div 
+                                                    key={subIdx}
+                                                    className="tactics-card tactics-bench-card"
+                                                    onClick={() => handleSlotClick(subSlotKey)}
+                                                >
+                                                    <span className="tactics-card-badge-pos" style={{ background: '#64748B', border: '1.5px solid #fff' }}>
+                                                        {subPlayer.position || `SUB ${subIdx + 1}`}
+                                                    </span>
+                                                    {subPlayer.element && (
+                                                        <span className="tactics-card-badge-elem">
+                                                            {getElementIcon(subPlayer.element)}
+                                                        </span>
+                                                    )}
+                                                    <div className="tactics-card-avatar">
+                                                        {subPlayer.image ? (
+                                                            <img 
+                                                                src={subPlayer.image} 
+                                                                alt={subPlayer.name}
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.nextSibling.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <div style={{
+                                                            display: subPlayer.image ? 'none' : 'flex',
+                                                            width: '100%', height: '100%',
+                                                            alignItems: 'center', justifyContent: 'center',
+                                                            fontSize: '1.4rem', fontWeight: 800,
+                                                            color: 'var(--text-muted)'
+                                                        }}>
+                                                            {subPlayer.name.charAt(0)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="tactics-card-info">
+                                                        {subPlayer.name}
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => handleClearSlot(subSlotKey, e)}
+                                                        className="tactics-card-clear-btn"
+                                                        title="후보 선수 비우기"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div 
+                                                    key={subIdx}
+                                                    className="tactics-card-empty tactics-bench-card-empty"
+                                                    onClick={() => handleSlotClick(subSlotKey)}
+                                                    title={`후보 ${subIdx + 1} 선수 등록`}
+                                                >
+                                                    <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>+</span>
+                                                    <span className="tactics-card-empty-role">
+                                                        SUB {subIdx + 1}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
 
                     </div>
