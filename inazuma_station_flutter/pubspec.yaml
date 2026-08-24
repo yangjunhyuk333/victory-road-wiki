@@ -1,5 +1,5 @@
-name: inazuma_station_mobile
-description: "이나즈마 일레븐 빅토리로드 모바일/태블릿 전용 크로스플랫폼 앱 (Flutter)"
+name: inazuma_station
+description: "이나즈마 일레븐 빅토리로드 모바일 전용 공식 크로스플랫폼 앱 (Flutter)"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -14,9 +14,6 @@ dependencies:
   google_fonts: ^6.1.0
   shared_preferences: ^2.2.2
   file_picker: ^8.0.0
-  fl_chart: ^0.66.2
-  flutter_staggered_animations: ^1.1.1
-  cached_network_image: ^3.3.1
   intl: ^0.19.0
 
 dev_dependencies:
@@ -28,4 +25,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/characters.json
-    - assets/images/

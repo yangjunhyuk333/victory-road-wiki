@@ -300,33 +300,56 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Smartphone size={18} color="#10B981" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    갤럭시 및 Android 스마트폰 설치
+                                    갤럭시 및 Android 스마트폰 앱 설치
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                브라우저 상단의 메뉴에서 <strong>'앱 설치'</strong> 또는 <strong>'홈 화면에 추가'</strong>를 누르시면 상단 주소창 없는 100% 모바일 전용 앱으로 설치되어 실행됩니다.
+                                Android 기기에서 설치할 수 있는 <strong>APK 설치 파일</strong>을 직접 다운로드하거나, <strong>원클릭 모바일 앱</strong>으로 즉시 설치하실 수 있습니다.
                             </p>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                                <button
-                                    onClick={handleInstallPWA}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                                {/* APK 직접 다운로드 버튼 */}
+                                <a
+                                    href="https://github.com/yangjunhyuk333/victory-road-wiki/releases"
+                                    target="_blank"
+                                    rel="noreferrer"
                                     style={{
                                         background: 'linear-gradient(135deg, #10B981, #059669)',
                                         color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '12px',
-                                        padding: '0.8rem',
+                                        textDecoration: 'none',
+                                        borderRadius: '14px',
+                                        padding: '0.85rem',
                                         fontSize: '0.88rem',
+                                        fontWeight: 800,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                                    }}
+                                >
+                                    <Download size={16} /> InazumaStation.apk 직접 다운로드
+                                </a>
+
+                                {/* 원클릭 모바일 앱 설치 (PWA) */}
+                                <button
+                                    onClick={handleInstallPWA}
+                                    style={{
+                                        background: 'rgba(59, 130, 246, 0.12)',
+                                        color: 'var(--primary-color, #3B82F6)',
+                                        border: '1.5px solid rgba(59, 130, 246, 0.35)',
+                                        borderRadius: '14px',
+                                        padding: '0.75rem',
+                                        fontSize: '0.82rem',
                                         fontWeight: 800,
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        gap: '0.5rem',
-                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)'
+                                        gap: '0.45rem'
                                     }}
                                 >
-                                    <Download size={16} /> 원클릭 모바일 앱 즉시 설치
+                                    <Sparkles size={15} /> 브라우저 원클릭 앱 즉시 등록
                                 </button>
 
                                 <div style={{
@@ -337,7 +360,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                                     color: 'var(--text-muted, #94a3b8)',
                                     lineHeight: 1.4
                                 }}>
-                                    💡 <strong>안내</strong>: 설치 후 스마트폰 홈 화면의 <strong>'이나즈마 스테이션'</strong> 아이콘을 누르면 모바일 바텀 네비게이션이 적용된 전용 앱으로 시작됩니다.
+                                    💡 <strong>Flutter 빌드</strong>: <code>inazuma_station_flutter</code> 폴더에서 <code>flutter build apk --release</code>로 최신 네이티브 APK를 생성할 수 있습니다.
                                 </div>
                             </div>
                         </div>
@@ -349,34 +372,43 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Smartphone size={18} color="#3B82F6" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    아이폰 (iPhone / iOS) 설치 방법
+                                    아이폰 (iPhone / iOS) 개발자 앱 설치
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                Safari(사파리) 브라우저에서 <strong>홈 화면에 추가(A2HS)</strong>를 진행하시면 앱스토어 앱과 동일한 풀스크린 네이티브 환경으로 실행됩니다.
+                                iOS 기기에서는 <strong>개발자 사이드로딩(AltStore / Sideloadly)</strong> 또는 <strong>Safari 홈 화면 추가</strong>를 통해 독립 앱으로 실행하실 수 있습니다.
                             </p>
 
                             <div style={{
                                 background: 'rgba(59, 130, 246, 0.08)',
                                 border: '1px solid rgba(59, 130, 246, 0.25)',
-                                borderRadius: '12px',
+                                borderRadius: '14px',
                                 padding: '0.85rem',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '0.6rem',
                                 fontSize: '0.8rem'
                             }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ background: 'var(--primary-color, #3B82F6)', color: '#fff', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>1</span>
-                                    <span>하단 중앙의 <strong>공유 아이콘 (<Share2 size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />)</strong> 클릭</span>
+                                <div style={{ fontWeight: 800, color: 'var(--primary-color, #3B82F6)', marginBottom: '0.2rem' }}>
+                                    🍏 개발자 사이드로딩 (AltStore / Sideloadly):
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #94a3b8)' }}>
+                                    1. <code>inazuma_station_flutter</code>에서 <code>flutter build ipa</code>로 빌드된 <code>.ipa</code> 파일 준비<br/>
+                                    2. AltStore 또는 Sideloadly를 통해 아이폰에 개발자 서명 후 직접 설치
+                                </div>
+
+                                <div style={{ height: '1px', background: 'rgba(59, 130, 246, 0.2)', margin: '0.3rem 0' }} />
+
+                                <div style={{ fontWeight: 800, color: '#10B981', marginBottom: '0.2rem' }}>
+                                    ⚡ 간편 1초 설치 (Safari 홈 화면 추가):
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ background: 'var(--primary-color, #3B82F6)', color: '#fff', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>2</span>
-                                    <span>메뉴를 아래로 스크롤하여 <strong>'홈 화면에 추가 (<PlusSquare size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />)'</strong> 선택</span>
+                                    <span style={{ background: 'var(--primary-color, #3B82F6)', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>1</span>
+                                    <span>하단 <strong>공유 아이콘 (<Share2 size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />)</strong> 클릭</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ background: 'var(--primary-color, #3B82F6)', color: '#fff', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800 }}>3</span>
-                                    <span>우측 상단 <strong>'추가'</strong>를 누르면 아이폰 홈 화면에 전용 앱 생성!</span>
+                                    <span style={{ background: 'var(--primary-color, #3B82F6)', color: '#fff', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>2</span>
+                                    <span><strong>'홈 화면에 추가 (<PlusSquare size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />)'</strong> 선택</span>
                                 </div>
                             </div>
                         </div>
@@ -388,17 +420,17 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                                 <Tablet size={18} color="#8B5CF6" />
                                 <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>
-                                    아이패드 (iPad / iPadOS) 대화면 설치
+                                    아이패드 (iPad / iPadOS) 대화면 앱 설치
                                 </h3>
                             </div>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5, margin: '0 0 1rem' }}>
-                                아이패드의 넓은 화면에 최적화된 <strong>2-Column 전술판과 도감 레이아웃</strong>을 단독 앱으로 즐기실 수 있습니다.
+                                아이패드의 넓은 화면에 최적화된 <strong>2-Column 전술판과 도감 레이아웃</strong>을 단독 개발자 앱 또는 홈 화면 앱으로 즐기실 수 있습니다.
                             </p>
 
                             <div style={{
                                 background: 'rgba(139, 92, 246, 0.08)',
                                 border: '1px solid rgba(139, 92, 246, 0.25)',
-                                borderRadius: '12px',
+                                borderRadius: '14px',
                                 padding: '0.85rem',
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -407,11 +439,11 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <CheckCircle2 size={16} color="#8B5CF6" />
-                                    <span>Safari 우측 상단 <strong>공유(<Share2 size={13} style={{ display: 'inline' }} />) → '홈 화면에 추가'</strong></span>
+                                    <span>AltStore / Sideloadly를 통한 iPadOS 개발자 IPA 사이드로딩 지원</span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <CheckCircle2 size={16} color="#8B5CF6" />
-                                    <span>스플릿 뷰(Split View) 및 애플 펜슬 드래그 앤 드롭 완벽 지원</span>
+                                    <span>Safari 우측 상단 <strong>공유(<Share2 size={12} style={{ display: 'inline' }} />) → '홈 화면에 추가'</strong> 지원</span>
                                 </div>
                             </div>
                         </div>
@@ -471,7 +503,7 @@ export default function AppDownloadModal({ isOpen, onClose }) {
                 {/* 하단 플러터 모바일 앱 소스 안내 */}
                 <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #94a3b8)' }}>
-                        📱 Flutter 기반 스마트폰/태블릿 전용 크로스플랫폼 프로젝트(<code>flutter_app/</code>) 제공 중
+                        📱 독립 격리된 Flutter 모바일 전용 앱 프로젝트: <code>inazuma_station_flutter/</code>
                     </span>
                 </div>
             </div>

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../models/character.dart';
-import '../theme/app_theme.dart';
+import '../../models/character.dart';
+import '../../core/theme/app_theme.dart';
 
-/// 👤 선수 상세 프로필 및 능력치/기술 화면
-class PlayerDetailScreen extends StatelessWidget {
+/// 👤 모바일 선수 상세 프로필 화면
+class PlayerProfileScreen extends StatelessWidget {
   final Character character;
 
-  const PlayerDetailScreen({super.key, required this.character});
+  const PlayerProfileScreen({super.key, required this.character});
 
   @override
   Widget build(BuildContext context) {
@@ -20,22 +20,18 @@ class PlayerDetailScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // 프로필 아바타
             Center(
               child: Container(
-                width: 140,
-                height: 140,
+                width: 130,
+                height: 130,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: elemColor.withOpacity(0.15),
                   border: Border.all(color: elemColor, width: 3),
                   boxShadow: [
-                    BoxShadow(
-                      color: elemColor.withOpacity(0.3),
-                      blurRadius: 20,
-                    ),
+                    BoxShadow(color: elemColor.withOpacity(0.25), blurRadius: 18),
                   ],
                 ),
                 child: Center(
@@ -43,42 +39,32 @@ class PlayerDetailScreen extends StatelessWidget {
                       ? Image.network(
                           character.image,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 70),
+                          errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 60),
                         )
-                      : const Icon(Icons.person, size: 70),
+                      : const Icon(Icons.person, size: 60),
                 ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // 이름 및 소속 팀
-            Text(
-              character.displayName,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
-            ),
+            // 선수 이름
+            Text(character.displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
             const SizedBox(height: 4),
-            Text(
-              character.team,
-              style: TextStyle(fontSize: 14, color: Colors.grey[400], fontWeight: FontWeight.w600),
-            ),
+            Text(character.team, style: TextStyle(fontSize: 13, color: Colors.grey[400], fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
 
-            // 속성, 포지션 뱃지
+            // 속성 / 포지션 뱃지
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildBadge(character.element, elemColor),
                 const SizedBox(width: 8),
                 _buildBadge(character.position, theme.primaryColor),
-                if (character.grade != null) ...[
-                  const SizedBox(width: 8),
-                  _buildBadge(character.grade!, Colors.amber),
-                ],
               ],
             ),
             const SizedBox(height: 24),
 
-            // 기본 스펙 카드
+            // 상세 프로필 스펙 카드
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -89,12 +75,12 @@ class PlayerDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('선수 프로필 정보', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                  const Text('선수 프로필 스펙', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
                   const Divider(height: 20),
-                  _buildInfoRow('속성', character.element),
-                  _buildInfoRow('메인 포지션', character.position),
-                  _buildInfoRow('소속 팀', character.team),
-                  if (character.gender != null) _buildInfoRow('성별', character.gender!),
+                  _buildRow('소속 팀', character.team),
+                  _buildRow('메인 포지션', character.position),
+                  _buildRow('속성', character.element),
+                  if (character.gender != null) _buildRow('성별', character.gender!),
                 ],
               ),
             ),
@@ -106,27 +92,24 @@ class PlayerDetailScreen extends StatelessWidget {
 
   Widget _buildBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
         color: color.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color, width: 1.2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color, width: 1),
       ),
-      child: Text(
-        text,
-        style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12),
-      ),
+      child: Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 12)),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
         ],
       ),
     );

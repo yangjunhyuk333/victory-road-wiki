@@ -33,7 +33,7 @@ class TacticPosition {
   }
 }
 
-/// 📋 전술 데이터 모델 (JSON 파일 내보내기/불러오기 완벽 호환)
+/// 📋 전술 데이터 모델 (웹/데스크톱 JSON 파일 100% 호환)
 class Tactic {
   final String id;
   String title;
@@ -58,7 +58,6 @@ class Tactic {
   });
 
   factory Tactic.fromJson(Map<String, dynamic> json) {
-    // squad 파싱
     Map<String, Character> squadMap = {};
     if (json['squad'] is Map) {
       (json['squad'] as Map).forEach((k, v) {
@@ -68,7 +67,6 @@ class Tactic {
       });
     }
 
-    // bench 파싱
     Map<String, Character> benchMap = {};
     if (json['bench'] is Map) {
       (json['bench'] as Map).forEach((k, v) {
@@ -78,7 +76,6 @@ class Tactic {
       });
     }
 
-    // positions 파싱
     List<TacticPosition> posList = [];
     if (json['positions'] is List) {
       posList = (json['positions'] as List)
