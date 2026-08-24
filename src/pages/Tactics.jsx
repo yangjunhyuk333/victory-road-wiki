@@ -882,283 +882,15 @@ export default function Tactics() {
 
                     </div>
 
-                    {/* 축구장 보드 (미니멀 평면 전술판 스타일) */}
-                    <div ref={fieldRef} className="soccer-field-container" style={{ outline: 'none' }}>
-                        {/* 축구장 내부 무늬 및 라인 레이어 */}
-                        <div className="soccer-field-stripes"></div>
-                        <div className="soccer-field-lines">
-                            <div className="field-center-line"></div>
-                            <div className="field-center-circle"></div>
-                            <div className="field-penalty-top"></div>
-                            <div className="field-penalty-bottom"></div>
-                            <div className="field-goal-top"></div>
-                            <div className="field-goal-bottom"></div>
-                        </div>
-
-                        {/* 포지션 노드 오버레이 */}
-                        {positions.map((slot) => {
-                            const player = squad[slot.id];
-                            const isCurrentlyDragging = draggingId === slot.id;
-
-                            return (
-                                <div 
-                                    key={slot.id}
-                                    className={`tactics-slot ${isCurrentlyDragging ? 'is-dragging' : ''}`}
-                                    style={{ 
-                                        top: `${slot.top}%`, 
-                                        left: `${slot.left}%`,
-                                        touchAction: 'none',
-                                        transition: isCurrentlyDragging ? 'none' : 'all var(--transition-speed) ease',
-                                        zIndex: isCurrentlyDragging ? 1000 : (activePositionSlotId === slot.id ? 1050 : 10)
-                                    }}
-                                    onMouseDown={(e) => handleMouseDown(slot.id, e)}
-                                    onTouchStart={(e) => handleTouchStart(slot.id, e)}
-                                >
-                                    {player ? (
-                                        // 선수 장착 카드
-                                        <div 
-                                            className={`tactics-card ${isCurrentlyDragging ? 'is-dragging' : ''}`}
-                                            onClick={() => handleSlotClick(slot.id)}
-                                            style={{ cursor: isDragMode ? 'move' : 'pointer' }}
-                                        >
-                                            {/* 포지션 역할 뱃지 */}
-                                            <span 
-                                                className="tactics-card-badge-pos"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (isDragMode) return;
-                                                    setActivePositionSlotId(slot.id);
-                                                }}
-                                                style={{
-                                                    cursor: isDragMode ? 'move' : 'pointer',
-                                                    transition: 'all 0.2s',
-                                                    backgroundColor: 'var(--primary-color)',
-                                                    border: '1.5px solid #fff'
-                                                }}
-                                                onMouseOver={e => {
-                                                    if (!isDragMode) {
-                                                        e.currentTarget.style.transform = 'scale(1.1)';
-                                                        e.currentTarget.style.backgroundColor = 'var(--accent-color)';
-                                                    }
-                                                }}
-                                                onMouseOut={e => {
-                                                    e.currentTarget.style.transform = '';
-                                                    e.currentTarget.style.backgroundColor = 'var(--primary-color)';
-                                                }}
-                                                title="클릭하여 포지션 역할 변경"
-                                            >
-                                                {slot.role}
-                                            </span>
-
-                                            {player.element && (
-                                                <span className="tactics-card-badge-elem">
-                                                    {getElementIcon(player.element)}
-                                                </span>
-                                            )}
-
-                                            <div className="tactics-card-avatar">
-                                                {player.image ? (
-                                                    <img 
-                                                        src={player.image} 
-                                                        alt={player.name}
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'flex';
-                                                        }}
-                                                    />
-                                                ) : null}
-                                                <div style={{
-                                                    display: player.image ? 'none' : 'flex',
-                                                    width: '100%', height: '100%',
-                                                    alignItems: 'center', justifyContent: 'center',
-                                                    fontSize: '1.4rem', fontWeight: 800,
-                                                    color: 'var(--text-muted)'
-                                                }}>
-                                                    {player.name.charAt(0)}
-                                                </div>
-                                            </div>
-
-                                            <div className="tactics-card-info">
-                                                {player.name}
-                                            </div>
-
-                                            <button
-                                                onClick={(e) => handleClearSlot(slot.id, e)}
-                                                style={{
-                                                    position: 'absolute',
-                                                    bottom: '18px', right: '4px',
-                                                    width: '15px', height: '15px',
-                                                    borderRadius: '50%',
-                                                    background: '#EF4444',
-                                                    color: '#fff',
-                                                    border: 'none',
-                                                    fontSize: '9px',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    cursor: 'pointer',
-                                                    fontWeight: 900,
-                                                    zIndex: 10
-                                                }}
-                                                title="선수 비우기"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        // 빈 슬롯 카드
-                                        <div 
-                                            className="tactics-card-empty"
-                                            onClick={() => handleSlotClick(slot.id)}
-                                            style={{ cursor: isDragMode ? 'move' : 'pointer' }}
-                                        >
-                                            <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
-                                            <span 
-                                                className="tactics-card-empty-role"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (isDragMode) return;
-                                                    setActivePositionSlotId(slot.id);
-                                                }}
-                                                style={{
-                                                    cursor: isDragMode ? 'move' : 'pointer',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                                onMouseOver={e => {
-                                                    if (!isDragMode) {
-                                                        e.currentTarget.style.transform = 'scale(1.1)';
-                                                        e.currentTarget.style.backgroundColor = 'var(--accent-color)';
-                                                    }
-                                                }}
-                                                onMouseOut={e => {
-                                                    e.currentTarget.style.transform = '';
-                                                    e.currentTarget.style.backgroundColor = '';
-                                                }}
-                                                title="클릭하여 포지션 역할 변경"
-                                            >
-                                                {slot.role}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '-15px',
-                                        opacity: isCurrentlyDragging || isDragMode ? 0.9 : 0,
-                                        transition: 'opacity 0.2s',
-                                        background: 'var(--primary-color)',
-                                        color: '#fff',
-                                        borderRadius: '50%',
-                                        padding: '3px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        zIndex: 10,
-                                        boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
-                                        pointerEvents: 'none'
-                                    }}>
-                                        <Move size={10} />
-                                    </div>
-
-                                    {/* 포지션 역할명 변경 드롭다운 팝오버 */}
-                                    {activePositionSlotId === slot.id && (
-                                        <div 
-                                            className="tactics-position-dropdown"
-                                            style={{
-                                                position: 'absolute',
-                                                zIndex: 1100,
-                                                width: '210px',
-                                                padding: '0.75rem',
-                                                background: 'var(--bg-surface-pure)',
-                                                borderRadius: '16px',
-                                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-                                                border: '1.5px solid var(--primary-color)',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                gap: '0.5rem',
-                                                cursor: 'default',
-                                                ...(slot.left < 30 ? { left: '10%' } : slot.left > 70 ? { right: '10%' } : { left: '50%', transform: 'translateX(-50%)' }),
-                                                ...(slot.top > 70 ? { bottom: '110%' } : { top: '110%' })
-                                            }}
-                                            onClick={(e) => e.stopPropagation()}
-                                            onMouseDown={(e) => e.stopPropagation()}
-                                        >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.3rem', marginBottom: '0.2rem' }}>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)' }}>역할 지정</span>
-                                                <button 
-                                                    onClick={() => setActivePositionSlotId(null)}
-                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '2px' }}
-                                                >
-                                                    <X size={12} />
-                                                </button>
-                                            </div>
-                                            <div style={{ maxHeight: '160px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '2px' }} className="custom-scrollbar">
-                                                {Object.entries({
-                                                    '공격수 (FW)': ['ST', 'CF', 'SS', 'LW', 'RW', 'LF', 'RF'],
-                                                    '미드필더 (MF)': ['AM', 'CAM', 'LM', 'RM', 'CM', 'LCM', 'RCM', 'DM', 'LDM', 'RDM'],
-                                                    '수비수 (DF)': ['CB', 'LCB', 'RCB', 'LB', 'RB', 'LWB', 'RWB'],
-                                                    '골키퍼 (GK)': ['GK']
-                                                }).map(([groupName, posList]) => (
-                                                    <div key={groupName} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                                        <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-muted)' }}>
-                                                            {groupName}
-                                                        </span>
-                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                                                            {posList.map(pos => {
-                                                                const isCurrent = slot.role === pos;
-                                                                return (
-                                                                    <button
-                                                                        key={pos}
-                                                                        onClick={() => {
-                                                                            setPositions(prev => prev.map(p => 
-                                                                                p.id === slot.id ? { ...p, role: pos } : p
-                                                                            ));
-                                                                            if (selectedFormation !== '커스텀') {
-                                                                                setSelectedFormation('커스텀');
-                                                                            }
-                                                                            setActivePositionSlotId(null);
-                                                                        }}
-                                                                        className={`btn ${isCurrent ? 'btn-primary' : 'btn-secondary'}`}
-                                                                        style={{
-                                                                            padding: '0.2rem 0.4rem',
-                                                                            fontSize: '0.62rem',
-                                                                            borderRadius: '6px',
-                                                                            borderWidth: '1px',
-                                                                            fontWeight: 700
-                                                                        }}
-                                                                    >
-                                                                        {pos}
-                                                                    </button>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* 2.1.2 하단 감독 & 벤치(후보 7인) 서브 섹션 */}
-                    <div className="glass-card tactics-sub-bench-section" style={{ marginTop: '1.5rem', padding: '1.25rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.6rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    👔 감독 & 벤치 멤버 (Substitutes)
-                                </span>
-                                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                                    (후보 {Object.keys(bench).length}/7명 │ 감독: {coach ? coach.name : '미선임'})
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* 감독과 벤치 슬롯들을 담는 래퍼 */}
-                        <div className="tactics-bench-wrapper">
+                    {/* 축구장 및 좌측 벤치 래퍼 */}
+                    <div className="tactics-field-workspace">
+                        
+                        {/* 2.1.1 좌측 세로형 감독 & 벤치(후보 7인) 사이드 랙 */}
+                        <div className="glass-card tactics-left-bench-section">
                             
                             {/* 감독(Coach) 슬롯 영역 */}
-                            <div className="tactics-coach-slot-container">
-                                <span className="tactics-bench-group-title">감독 (Manager)</span>
+                            <div className="tactics-left-coach-container">
+                                <span className="tactics-bench-group-title">👔 감독 (Coach)</span>
                                 {coach ? (
                                     <div 
                                         className="tactics-card tactics-bench-card tactics-coach-card"
@@ -1218,13 +950,13 @@ export default function Tactics() {
                                 )}
                             </div>
 
-                            {/* 구분선 (디바이더) */}
-                            <div className="tactics-bench-divider"></div>
+                            {/* 세로 구분선 */}
+                            <div className="tactics-left-divider"></div>
 
-                            {/* 벤치 후보 선수들 (SUB 1 ~ 7) */}
-                            <div className="tactics-sub-slots-container">
-                                <span className="tactics-bench-group-title">후보 선수 (Bench 7인)</span>
-                                <div className="tactics-sub-slots-grid">
+                            {/* 벤치 후보 선수들 (SUB 1 ~ 7 세로 나열) */}
+                            <div className="tactics-left-subs-container">
+                                <span className="tactics-bench-group-title">💺 후보 (7인)</span>
+                                <div className="tactics-left-subs-grid custom-scrollbar">
                                     {[0, 1, 2, 3, 4, 5, 6].map((subIdx) => {
                                         const subSlotKey = `bench_${subIdx}`;
                                         const subPlayer = bench[subIdx];
@@ -1293,6 +1025,244 @@ export default function Tactics() {
                             </div>
 
                         </div>
+
+                        {/* 2.1.2 축구장 보드 (미니멀 평면 전술판 스타일) */}
+                        <div ref={fieldRef} className="soccer-field-container" style={{ outline: 'none' }}>
+                            {/* 축구장 내부 무늬 및 라인 레이어 */}
+                            <div className="soccer-field-stripes"></div>
+                            <div className="soccer-field-lines">
+                                <div className="field-center-line"></div>
+                                <div className="field-center-circle"></div>
+                                <div className="field-penalty-top"></div>
+                                <div className="field-penalty-bottom"></div>
+                                <div className="field-goal-top"></div>
+                                <div className="field-goal-bottom"></div>
+                            </div>
+
+                            {/* 포지션 노드 오버레이 */}
+                            {positions.map((slot) => {
+                                const player = squad[slot.id];
+                                const isCurrentlyDragging = draggingId === slot.id;
+
+                                return (
+                                    <div 
+                                        key={slot.id}
+                                        className={`tactics-slot ${isCurrentlyDragging ? 'is-dragging' : ''}`}
+                                        style={{ 
+                                            top: `${slot.top}%`, 
+                                            left: `${slot.left}%`,
+                                            touchAction: 'none',
+                                            transition: isCurrentlyDragging ? 'none' : 'all var(--transition-speed) ease',
+                                            zIndex: isCurrentlyDragging ? 1000 : (activePositionSlotId === slot.id ? 1050 : 10)
+                                        }}
+                                        onMouseDown={(e) => handleMouseDown(slot.id, e)}
+                                        onTouchStart={(e) => handleTouchStart(slot.id, e)}
+                                    >
+                                        {player ? (
+                                            // 선수 장착 카드
+                                            <div 
+                                                className={`tactics-card ${isCurrentlyDragging ? 'is-dragging' : ''}`}
+                                                onClick={() => handleSlotClick(slot.id)}
+                                                style={{ cursor: isDragMode ? 'move' : 'pointer' }}
+                                            >
+                                                {/* 포지션 역할 뱃지 */}
+                                                <span 
+                                                    className="tactics-card-badge-pos"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (isDragMode) return;
+                                                        setActivePositionSlotId(slot.id);
+                                                    }}
+                                                    style={{
+                                                        cursor: isDragMode ? 'move' : 'pointer',
+                                                        transition: 'all 0.2s',
+                                                        backgroundColor: 'var(--primary-color)',
+                                                        border: '1.5px solid #fff'
+                                                    }}
+                                                    onMouseOver={e => {
+                                                        if (!isDragMode) {
+                                                            e.currentTarget.style.transform = 'scale(1.1)';
+                                                            e.currentTarget.style.backgroundColor = 'var(--accent-color)';
+                                                        }
+                                                    }}
+                                                    onMouseOut={e => {
+                                                        e.currentTarget.style.transform = '';
+                                                        e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                                                    }}
+                                                    title="클릭하여 포지션 역할 변경"
+                                                >
+                                                    {slot.role}
+                                                </span>
+
+                                                {/* 속성 아이콘 */}
+                                                {player.element && (
+                                                    <span className="tactics-card-badge-elem">
+                                                        {getElementIcon(player.element)}
+                                                    </span>
+                                                )}
+
+                                                {/* 선수 프로필 아바타 이미지 */}
+                                                <div className="tactics-card-avatar">
+                                                    {player.image ? (
+                                                        <img 
+                                                            src={player.image} 
+                                                            alt={player.name}
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <div style={{
+                                                        display: player.image ? 'none' : 'flex',
+                                                        width: '100%', height: '100%',
+                                                        alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: '1.4rem', fontWeight: 800,
+                                                        color: 'var(--text-muted)'
+                                                    }}>
+                                                        {player.name.charAt(0)}
+                                                    </div>
+                                                </div>
+
+                                                {/* 선수 이름 및 정보 */}
+                                                <div className="tactics-card-info">
+                                                    {player.name}
+                                                </div>
+
+                                                {/* 슬롯 비우기 버튼 */}
+                                                <button
+                                                    onClick={(e) => handleClearSlot(slot.id, e)}
+                                                    className="tactics-card-clear-btn"
+                                                    title="배치된 선수 비우기"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            // 미배치 빈 슬롯 카드
+                                            <div 
+                                                className={`tactics-card-empty ${isCurrentlyDragging ? 'is-dragging' : ''}`}
+                                                onClick={() => handleSlotClick(slot.id)}
+                                                style={{ cursor: isDragMode ? 'move' : 'pointer' }}
+                                                title={isDragMode ? '드래그하여 위치 변경' : '클릭하여 선수 배치'}
+                                            >
+                                                <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>+</span>
+                                                <span 
+                                                    className="tactics-card-empty-role"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (isDragMode) return;
+                                                        setActivePositionSlotId(slot.id);
+                                                    }}
+                                                    title="클릭하여 포지션 역할 변경"
+                                                >
+                                                    {slot.role}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* 드래그 가능 모드 힌트 인디케이터 아이콘 */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '-15px',
+                                            opacity: isCurrentlyDragging || isDragMode ? 0.9 : 0,
+                                            transition: 'opacity 0.2s',
+                                            background: 'var(--primary-color)',
+                                            color: '#fff',
+                                            borderRadius: '50%',
+                                            padding: '3px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            zIndex: 10,
+                                            boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+                                            pointerEvents: 'none'
+                                        }}>
+                                            <Move size={10} />
+                                        </div>
+
+                                        {/* 포지션 역할명 변경 드롭다운 팝오버 */}
+                                        {activePositionSlotId === slot.id && (
+                                            <div 
+                                                className="tactics-position-dropdown"
+                                                style={{
+                                                    position: 'absolute',
+                                                    zIndex: 1100,
+                                                    width: '210px',
+                                                    padding: '0.75rem',
+                                                    background: 'var(--bg-surface-pure)',
+                                                    borderRadius: '16px',
+                                                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+                                                    border: '1.5px solid var(--primary-color)',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '0.5rem',
+                                                    cursor: 'default',
+                                                    ...(slot.left < 30 ? { left: '10%' } : slot.left > 70 ? { right: '10%' } : { left: '50%', transform: 'translateX(-50%)' }),
+                                                    ...(slot.top > 70 ? { bottom: '110%' } : { top: '110%' })
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                                onMouseDown={(e) => e.stopPropagation()}
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.3rem', marginBottom: '0.2rem' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)' }}>역할 지정</span>
+                                                    <button 
+                                                        onClick={() => setActivePositionSlotId(null)}
+                                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: '2px' }}
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                                <div style={{ maxHeight: '160px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingRight: '2px' }} className="custom-scrollbar">
+                                                    {Object.entries({
+                                                        '공격수 (FW)': ['ST', 'CF', 'SS', 'LW', 'RW', 'LF', 'RF'],
+                                                        '미드필더 (MF)': ['AM', 'CAM', 'LM', 'RM', 'CM', 'LCM', 'RCM', 'DM', 'LDM', 'RDM'],
+                                                        '수비수 (DF)': ['CB', 'LCB', 'RCB', 'LB', 'RB', 'LWB', 'RWB'],
+                                                        '골키퍼 (GK)': ['GK']
+                                                    }).map(([groupName, posList]) => (
+                                                        <div key={groupName} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                            <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                                                                {groupName}
+                                                            </span>
+                                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                                                                {posList.map(pos => {
+                                                                    const isCurrent = slot.role === pos;
+                                                                    return (
+                                                                        <button
+                                                                            key={pos}
+                                                                            onClick={() => {
+                                                                                setPositions(prev => prev.map(p => 
+                                                                                    p.id === slot.id ? { ...p, role: pos } : p
+                                                                                ));
+                                                                                if (selectedFormation !== '커스텀') {
+                                                                                    setSelectedFormation('커스텀');
+                                                                                }
+                                                                                setActivePositionSlotId(null);
+                                                                            }}
+                                                                            className={`btn ${isCurrent ? 'btn-primary' : 'btn-secondary'}`}
+                                                                            style={{
+                                                                                padding: '0.2rem 0.4rem',
+                                                                                fontSize: '0.62rem',
+                                                                                borderRadius: '6px',
+                                                                                borderWidth: '1px',
+                                                                                fontWeight: 700
+                                                                            }}
+                                                                        >
+                                                                            {pos}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
                     </div>
                 </div>
 

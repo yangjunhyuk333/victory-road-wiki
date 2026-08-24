@@ -1048,60 +1048,76 @@ a:hover {
 }
 
 /* ==========================================
-   전술판: 감독 & 벤치(후보 7인) 서브 섹션 스타일
+   전술판: 좌측 세로형 감독 & 벤치(후보 7인) 랙 스타일
    ========================================== */
-.tactics-sub-bench-section {
+.tactics-field-workspace {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: var(--field-max-width);
+}
+
+.tactics-left-bench-section {
+  width: 104px;
+  flex-shrink: 0;
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   border: var(--card-border);
   border-radius: 18px;
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+  padding: 0.9rem 0.6rem;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
   box-shadow: var(--soft-shadow);
-}
-
-.tactics-bench-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-}
-
-.tactics-coach-slot-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
+  gap: 0.75rem;
+  max-height: 560px; /* 축구장 높이와 일치 */
+}
+
+.tactics-left-coach-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
 }
 
 .tactics-bench-group-title {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: var(--text-muted);
   letter-spacing: -0.5px;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.tactics-bench-divider {
-  width: 1.5px;
-  height: 85px;
+.tactics-left-divider {
+  width: 90%;
+  height: 1px;
   background: var(--border-color);
-  margin-top: 1.4rem;
-  flex-shrink: 0;
+  margin: 0.1rem 0;
 }
 
-.tactics-sub-slots-container {
+.tactics-left-subs-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
   flex: 1;
+  min-height: 0;
 }
 
-.tactics-sub-slots-grid {
+.tactics-left-subs-grid {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
+  gap: 0.6rem;
+  width: 100%;
+  overflow-y: auto;
+  padding: 0.2rem 0.1rem 0.4rem 0.1rem;
 }
 
 .tactics-bench-card {
@@ -1146,4 +1162,38 @@ a:hover {
   transform: translateY(-3px);
   border-color: var(--primary-color);
   background: rgba(59, 130, 246, 0.08);
+}
+
+/* 좁은 화면(태블릿/모바일) 대응 */
+@media (max-width: 900px) {
+  .tactics-field-workspace {
+    flex-direction: column;
+    align-items: center;
+  }
+  .tactics-left-bench-section {
+    width: 100%;
+    max-height: none;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0.75rem;
+  }
+  .tactics-left-coach-container {
+    width: auto;
+    flex-shrink: 0;
+  }
+  .tactics-left-divider {
+    width: 1px;
+    height: 70px;
+    margin: 0 0.5rem;
+  }
+  .tactics-left-subs-container {
+    width: auto;
+    flex-direction: row;
+  }
+  .tactics-left-subs-grid {
+    flex-direction: row;
+    overflow-y: visible;
+    overflow-x: auto;
+  }
 }
