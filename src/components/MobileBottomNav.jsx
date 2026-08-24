@@ -5,21 +5,14 @@ import { Home, BookOpen, Trello, Download, Settings } from 'lucide-react';
  * 📱 스마트폰 모바일 전용 현대적 플로팅 바텀 네비게이션 바
  * 화면 너비 768px 미만의 모바일 기기에서만 화면 하단에 고정 표시됩니다.
  */
-export default function MobileBottomNav({ onOpenDownloadModal }) {
+export default function MobileBottomNav() {
     const location = useLocation();
     const currentPath = location.pathname;
 
     const navItems = [
         { path: '/', label: '홈', icon: Home },
         { path: '/zukan', label: '캐릭터 도감', icon: BookOpen },
-        { path: '/tactics', label: '전술판', icon: Trello },
-        { 
-            isAction: true, 
-            action: onOpenDownloadModal, 
-            label: '앱 설치', 
-            icon: Download,
-            highlight: true
-        }
+        { path: '/tactics', label: '전술판', icon: Trello }
     ];
 
     return (

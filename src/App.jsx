@@ -74,42 +74,8 @@ function Navbar({ theme, toggleTheme, onOpenDownloadModal }) {
         </div>
       </div>
       
-      {/* 우측 영역: 앱 다운로드 버튼 & 반응형 테마 스위치 */}
+      {/* 우측 영역: 테마 스위치 */}
       <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-        
-        {/* 📲 OS 자동 인식 앱 다운로드 버튼 */}
-        <button
-          onClick={onOpenDownloadModal}
-          className="btn btn-primary app-download-nav-btn"
-          style={{
-            fontSize: '0.82rem',
-            padding: '0.45rem 0.9rem',
-            borderRadius: '24px',
-            background: 'linear-gradient(135deg, var(--primary-color), #059669)',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
-          }}
-          title={`${deviceInfo.displayName} 전용 앱 다운로드 및 설치 안내`}
-        >
-          <Download size={14} />
-          <span>앱 다운로드</span>
-          {deviceInfo.isMobile && (
-            <span style={{ fontSize: '0.65rem', background: 'rgba(255, 255, 255, 0.25)', padding: '1px 6px', borderRadius: '10px' }}>
-              {deviceInfo.os === 'android' ? '갤럭시' : '아이폰'}
-            </span>
-          )}
-          {deviceInfo.isTablet && (
-            <span style={{ fontSize: '0.65rem', background: 'rgba(255, 255, 255, 0.25)', padding: '1px 6px', borderRadius: '10px' }}>
-              아이패드/태블릿
-            </span>
-          )}
-        </button>
-
         {/* 테마 스위치 */}
         <button 
           onClick={toggleTheme} 
@@ -141,9 +107,6 @@ function App() {
     return localStorage.getItem('theme') || 'dark';
   });
 
-  // 앱 다운로드 모달 열림 상태 관리
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-
   // 테마 변경 시 HTML DOM Attribute 및 localStorage 즉시 동기화
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -161,14 +124,13 @@ function App() {
       <Navbar 
         theme={theme} 
         toggleTheme={toggleTheme} 
-        onOpenDownloadModal={() => setIsDownloadModalOpen(true)} 
       />
       
       {/* 본문 라우팅 테이블 */}
       <div className="app-main-content">
         <Routes>
           {/* 메인 홈 페이지 */}
-          <Route path="/" element={<Home onOpenDownloadModal={() => setIsDownloadModalOpen(true)} />} />
+          <Route path="/" element={<Home />} />
           
           {/* 캐릭터 대도감 페이지 */}
           <Route path="/zukan" element={<Zukan />} />
@@ -184,14 +146,8 @@ function App() {
         </Routes>
       </div>
 
-      {/* 📱 모바일 전용 하단 바텀 네비게이션 바 (768px 미만에서만 노출) */}
-      <MobileBottomNav onOpenDownloadModal={() => setIsDownloadModalOpen(true)} />
-
-      {/* 📲 OS 자동 인식 앱 다운로드 모달 */}
-      <AppDownloadModal 
-        isOpen={isDownloadModalOpen} 
-        onClose={() => setIsDownloadModalOpen(false)} 
-      />
+      {/* 📱 모바일 전용 하단 바텀 네비게이션 바 */}
+      <MobileBottomNav />
     </HashRouter>
   );
 }

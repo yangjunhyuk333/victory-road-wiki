@@ -5,7 +5,7 @@ import { Trophy, BookOpen, Users, Star, ArrowRight, Zap, Folder, Plus, Trash2, S
 import charactersData from '../data/characters.json';
 import { getPlayerDisplayName, teamTranslation } from '../utils/playerHelpers'; // 중복 캐릭터 버전 표시 및 팀명 한글화 헬퍼 임포트
 
-export default function Home({ onOpenDownloadModal }) {
+export default function Home() {
     const navigate = useNavigate();
     const [savedTactics, setSavedTactics] = useState([]);
     
@@ -138,7 +138,7 @@ export default function Home({ onOpenDownloadModal }) {
                     </div>
                 </div>
                 
-                {/* 콤팩트 통계 현황판 및 앱 다운로드 버튼 */}
+                {/* 콤팩트 통계 현황판 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'right', borderRight: '1px solid var(--border-color)', paddingRight: '1.5rem' }}>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>로컬 스쿼드 파일</div>
@@ -146,35 +146,10 @@ export default function Home({ onOpenDownloadModal }) {
                             {localStorage.getItem('victory_road_tactics') ? JSON.parse(localStorage.getItem('victory_road_tactics')).length : 0}개
                         </div>
                     </div>
-                    <div style={{ textAlign: 'right', borderRight: onOpenDownloadModal ? '1px solid var(--border-color)' : 'none', paddingRight: onOpenDownloadModal ? '1.5rem' : '0' }}>
+                    <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>총 데이터베이스</div>
                         <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--accent-color)', marginTop: '0.1rem' }}>5,400+명</div>
                     </div>
-                    {onOpenDownloadModal && (
-                        <button
-                            onClick={onOpenDownloadModal}
-                            className="btn btn-secondary"
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                padding: '0.6rem 1.1rem',
-                                borderRadius: '16px',
-                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.12))',
-                                border: '1.5px solid rgba(59, 130, 246, 0.3)',
-                                fontSize: '0.85rem',
-                                fontWeight: 800,
-                                color: 'var(--text-main)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
-                            onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)'}
-                        >
-                            <Smartphone size={16} color="var(--primary-color)" />
-                            모바일/태블릿 앱 설치
-                        </button>
-                    )}
                 </div>
             </header>
 
