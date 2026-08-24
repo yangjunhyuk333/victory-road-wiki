@@ -284,13 +284,19 @@ export function refineTranslation(text) {
   // 번역 정제 치환 규칙 매핑 사전 (정규식 기반 순차 적용)
   const rules = [
     // 1. 축구 및 인게임 역할 용어 보정 (방어 -> 수비, 공격 -> 공격)
+    { pattern: /골골골키퍼/gi, replace: '골키퍼' },
+    { pattern: /골골키퍼/gi, replace: '골키퍼' },
     { pattern: /디펜스/gi, replace: '수비' },
     { pattern: /오펜스/gi, replace: '공격' },
     { pattern: /디펜더/gi, replace: '수비수' },
     { pattern: /포워드/gi, replace: '공격수' },
     { pattern: /미드필더/gi, replace: '미드필더' },
     { pattern: /골키퍼/gi, replace: '골키퍼' },
-    { pattern: /키퍼/gi, replace: '골키퍼' },
+    { pattern: /(?<!골)키퍼/gi, replace: '골키퍼' },
+    { pattern: /엠펠러 오브 골키퍼/gi, replace: '엠페러 오브 골키퍼' },
+    { pattern: /엠펠러/gi, replace: '엠페러' },
+    { pattern: /킹 오브 골키퍼/gi, replace: '킹 오브 골키퍼' },
+    { pattern: /왕 앞에 사각은 없다/g, replace: '왕의 앞에 사각은 없다' },
     { pattern: /방어는/g, replace: '수비는' },
     { pattern: /방어의/g, replace: '수비의' },
     { pattern: /방어력을/g, replace: '수비력을' },
@@ -773,7 +779,20 @@ export function refineTranslation(text) {
     { pattern: /있다나 뭐라나/g, replace: '있다고 한다' },
     { pattern: /라나 뭐라나/g, replace: '라고 한다' },
 
-    // 18. 이나즈마 일레븐 세계관 고유 고유명사 전수 점검 교정
+    // 18. 이나즈마 일레븐 세계관 고유 고유명사 및 에이스 묘사 전수 점검 교정
+    { pattern: /하나님처럼 아름답다/g, replace: '신처럼 아름답다' },
+    { pattern: /하나님처럼/g, replace: '신처럼' },
+    { pattern: /키도를 지지한다/g, replace: '키도를 보좌한다' },
+    { pattern: /키도를 지탱한다/g, replace: '키도를 보좌한다' },
+    { pattern: /참모역으로서/g, replace: '참모 역할을 맡아' },
+    { pattern: /참모역으로/g, replace: '참모 역할을 맡아' },
+    { pattern: /손의 것\./g, replace: '특기.' },
+    { pattern: /손의 것/g, replace: '특기' },
+    { pattern: /폭주 사나이우/g, replace: '폭주 사나이' },
+    { pattern: /기분이 높다/g, replace: '투지가 끓어오른다' },
+    { pattern: /기분이 높아진다/g, replace: '투지가 끓어오른다' },
+    { pattern: /마음이 고조된다/g, replace: '투지가 끓어오른다' },
+    { pattern: /평상시는/g, replace: '평소에는' },
     { pattern: /사카마키의 명령을/g, replace: '사카마키의 명령을' },
     { pattern: /사카마키가 만든/g, replace: '사카마키가 만든' },
     { pattern: /하이퍼 다이브 모드로/g, replace: '하이퍼 다이브 모드로' },
@@ -804,6 +823,32 @@ export function refineTranslation(text) {
   rules.forEach(rule => {
     refined = refined.replace(rule.pattern, rule.replace);
   });
+
+  // 19. 문장 종결 어미 완전 서술체화 (존댓말 잔재 100% 제거 및 골키퍼 중복 방지)
+  refined = refined
+    .replace(/었습니다(?=[\s\.\,\!\?]|$)/g, '었다')
+    .replace(/았습니다(?=[\s\.\,\!\?]|$)/g, '았다')
+    .replace(/였습니다(?=[\s\.\,\!\?]|$)/g, '였다')
+    .replace(/이었습니다(?=[\s\.\,\!\?]|$)/g, '이었다')
+    .replace(/했습니다(?=[\s\.\,\!\?]|$)/g, '했다')
+    .replace(/있습니다(?=[\s\.\,\!\?]|$)/g, '있다')
+    .replace(/없습니다(?=[\s\.\,\!\?]|$)/g, '없다')
+    .replace(/입니다(?=[\s\.\,\!\?]|$)/g, '이다')
+    .replace(/합니다(?=[\s\.\,\!\?]|$)/g, '한다')
+    .replace(/됩니다(?=[\s\.\,\!\?]|$)/g, '된다')
+    .replace(/받습니다(?=[\s\.\,\!\?]|$)/g, '받는다')
+    .replace(/줍니다(?=[\s\.\,\!\?]|$)/g, '준다')
+    .replace(/봅니다(?=[\s\.\,\!\?]|$)/g, '본다')
+    .replace(/옵니다(?=[\s\.\,\!\?]|$)/g, '온다')
+    .replace(/갑니다(?=[\s\.\,\!\?]|$)/g, '간다')
+    .replace(/낫습니다(?=[\s\.\,\!\?]|$)/g, '낫다')
+    .replace(/쉽습니다(?=[\s\.\,\!\?]|$)/g, '쉽다')
+    .replace(/어렵습니다(?=[\s\.\,\!\?]|$)/g, '어려워한다')
+    .replace(/아름답습니다(?=[\s\.\,\!\?]|$)/g, '아름답다')
+    .replace(/습니다(?=[\s\.\,\!\?]|$)/g, '다')
+    .replace(/골골골키퍼/g, '골키퍼')
+    .replace(/골골키퍼/g, '골키퍼')
+    .replace(/엠펠러/g, '엠페러');
 
   return refined;
 }
