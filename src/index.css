@@ -1326,14 +1326,14 @@ a:hover {
   transform: scale(0.92);
 }
 
-/* 768px 미만(스마트폰 모바일)에서 바텀바 활성화 및 하단 여백 확보 */
-@media (max-width: 768px) {
+/* 900px 이하(스마트폰 및 모바일 뷰포트)에서 바텀바 활성화 및 하단 여백 확보 */
+@media (max-width: 900px) {
   .mobile-bottom-nav-container {
-    display: block;
+    display: block !important;
   }
   
   .app-main-content {
-    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .nav-desktop-link {

@@ -36,11 +36,11 @@ export default function AppDownloadModal({ isOpen, onClose }) {
 
     if (!isOpen) return null;
 
-    // 안전한 직접 APK 파일 다운로드 핸들러
+    // 안전한 직접 APK 파일 다운로드 핸들러 (캐시 방지 파라미터 적용)
     const handleDownloadApk = async () => {
         try {
             setIsDownloadingApk(true);
-            const apkUrl = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk`;
+            const apkUrl = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk?v=${Date.now()}`;
             const response = await fetch(apkUrl);
             if (!response.ok) throw new Error('Download failed');
             
@@ -56,9 +56,8 @@ export default function AppDownloadModal({ isOpen, onClose }) {
         } catch (err) {
             // Fallback: 직접 링크 열기
             const link = document.createElement('a');
-            link.href = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk`;
+            link.href = `${import.meta.env.BASE_URL}downloads/InazumaStation.apk?v=${Date.now()}`;
             link.download = 'InazumaStation.apk';
-            link.target = '_blank';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

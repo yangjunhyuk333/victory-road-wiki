@@ -78,6 +78,30 @@ export default function Zukan() {
         });
     }, [searchTerm, filterElement, filterPosition]);
 
+    // 검색어나 필터 조건이 변경되면 즉시 1페이지로 리셋합니다.
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm, filterElement, filterPosition]);
+
+    // 하단 도달 시 자동으로 다음 60명을 로드하는 무한 스크롤 Observer
+    useEffect(() => {
+        const observerTarget = document.getElementById('infinite-scroll-trigger');
+        if (!observerTarget) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                setPage(prev => {
+                    const maxPage = Math.ceil(filteredCharacters.length / itemsPerPage);
+                    if (prev < maxPage) return prev + 1;
+                    return prev;
+                });
+            }
+        }, { threshold: 0.1 });
+
+        observer.observe(observerTarget);
+        return () => observer.disconnect();
+    }, [filteredCharacters.length]);
+
     // 무한 스크롤(더보기) 방식의 노출 선수 배열 슬라이싱
     const displayedCharacters = filteredCharacters.slice(0, page * itemsPerPage);
 
@@ -271,15 +295,15 @@ export default function Zukan() {
                 ))}
             </div>
 
-            {/* 더 보기 무한 스크롤 트리거 버튼 */}
+            {/* 더 보기 무한 스크롤 트리거 버튼 및 자동 관찰 타겟 */}
             {filteredCharacters.length > displayedCharacters.length && (
-                <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+                <div id="infinite-scroll-trigger" style={{ textAlign: 'center', marginTop: '3rem', padding: '1rem' }}>
                     <button
                         className="btn btn-secondary"
                         onClick={() => setPage(p => p + 1)}
                         style={{ padding: '0.85rem 3rem', borderRadius: '30px', fontSize: '1rem' }}
                     >
-                        더 보기 ({displayedCharacters.length} / {filteredCharacters.length})
+                        선수 더 불러오기 ({displayedCharacters.length} / {filteredCharacters.length})
                     </button>
                 </div>
             )}
