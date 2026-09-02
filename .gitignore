@@ -28,3 +28,7 @@ temp_electron_build
 # Large Binaries
 InazumaStation_Windows.zip
 public/downloads/InazumaStation_Windows.zip
+
+# Agents & Secret configs
+.agents/
+

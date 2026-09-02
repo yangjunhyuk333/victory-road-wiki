@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import charactersData from '../data/characters.json';
-import { Search, Save, Trash2, FolderOpen, RefreshCw, X, Award, Flame, Wind, TreePine, Mountain, Move, CheckCircle, AlertTriangle, AlertCircle, Download, Upload } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { Search, Save, Trash2, FolderOpen, RefreshCw, X, Award, Flame, Wind, TreePine, Mountain, Move, CheckCircle, AlertTriangle, AlertCircle, Download, Upload, Camera, Sparkles, Activity, Zap, Shield, Crosshair } from 'lucide-react';
 
 // 고도화: 지원 포메이션 확장 라인업 (총 8종의 기본 레이아웃 정의)
 const FORMATIONS = {
@@ -243,6 +244,66 @@ export default function Tactics() {
         fetchSavedTacticsList();
         fetchSavedFormationsList();
     }, []);
+
+    // 🌟 실시간 스쿼드 분석 및 종합 전력 스탯 계산기
+    const squadStats = useMemo(() => {
+        let count = 0;
+        let kick = 0, guard = 0, control = 0, speed = 0, stamina = 0, tp = 0;
+        const elements = { '화': 0, '풍': 0, '림': 0, '산': 0, '무': 0 };
+
+        Object.values(squad).forEach(player => {
+            if (!player) return;
+            count++;
+            const s = player.stats || {};
+            kick += Number(s.kick || s.kick_power || 0);
+            guard += Number(s.guard || s.defense || 0);
+            control += Number(s.control || s.technique || 0);
+            speed += Number(s.speed || s.agility || 0);
+            stamina += Number(s.stamina || s.guts || 0);
+            tp += Number(s.tp || s.max_tp || 100);
+
+            const elem = player.element || '무';
+            if (elements[elem] !== undefined) elements[elem]++;
+            else elements['무']++;
+        });
+
+        return {
+            playerCount: count,
+            totalKick: kick,
+            totalGuard: guard,
+            totalControl: control,
+            avgSpeed: count > 0 ? Math.round(speed / count) : 0,
+            avgStamina: count > 0 ? Math.round(stamina / count) : 0,
+            avgTp: count > 0 ? Math.round(tp / count) : 0,
+            overallPower: Math.round(kick * 1.2 + guard * 1.2 + control * 1.0 + speed * 0.8),
+            elements
+        };
+    }, [squad]);
+
+    // 📷 전술판 고화질 이미지 캡처 및 다운로드
+    const [isExporting, setIsExporting] = useState(false);
+    const handleExportImage = async () => {
+        if (!fieldRef.current) return;
+        setIsExporting(true);
+        try {
+            const canvas = await html2canvas(fieldRef.current, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#0F172A'
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `이나즈마_스쿼드_${selectedFormation}_${new Date().toISOString().slice(0, 10)}.png`;
+            link.click();
+        } catch (err) {
+            console.error("이미지 내보내기 실패:", err);
+            alert("스쿼드 이미지 저장 중 오류가 발생했습니다.");
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     // URL 쿼리 파라미터로 전달된 loadId가 있으면 최초 1회만 자동으로 해당 전술 탑재
     useEffect(() => {
@@ -1407,6 +1468,30 @@ export default function Tactics() {
                                 {autoSaveStatus === 'saving' ? '자동 수정 중...' : (autoSaveStatus === 'saved' ? '자동 수정됨' : (isAutoSave ? '자동 수정 ON' : '자동 수정 OFF'))}
                             </button>
 
+                            {/* 📷 스쿼드 이미지 캡처 저장 버튼 */}
+                            <button
+                                className="btn btn-secondary"
+                                style={{ 
+                                    padding: '0.45rem 0.75rem', 
+                                    fontSize: '0.74rem', 
+                                    borderRadius: '10px', 
+                                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(16, 185, 129, 0.15))',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    color: 'var(--text-main)',
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={handleExportImage}
+                                disabled={isExporting}
+                                title="현재 배치된 전술판을 고화질 PNG 이미지로 저장합니다"
+                            >
+                                <Camera size={13} color="var(--primary-color)" />
+                                {isExporting ? '캡처 중...' : '이미지 저장'}
+                            </button>
+
                             {/* ✨ 스마트 대형 자동 정렬 버튼 */}
                             <button
                                 className="btn btn-secondary"
@@ -1439,6 +1524,69 @@ export default function Tactics() {
                             </button>
                         </div>
 
+                    </div>
+
+                    {/* 🌟 실시간 스쿼드 종합 전력 및 시너지 분석 HUD 패널 */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                        gap: '0.6rem',
+                        marginBottom: '0.8rem',
+                        padding: '0.75rem 1rem',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '14px',
+                        boxShadow: 'var(--soft-shadow)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Award size={16} color="var(--primary-color)" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>종합 전력</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary-color)' }}>{squadStats.overallPower.toLocaleString()}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Crosshair size={16} color="#EF4444" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 공격력(킥)</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#EF4444' }}>{squadStats.totalKick.toLocaleString()}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Shield size={16} color="#10B981" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 수비력(가드)</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10B981' }}>{squadStats.totalGuard.toLocaleString()}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Zap size={16} color="#F59E0B" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>평균 스피드</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#F59E0B' }}>{squadStats.avgSpeed}</div>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Sparkles size={16} color="#A855F7" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>스쿼드 완성도</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#A855F7' }}>{squadStats.playerCount} / 11명</div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* 축구장 및 하단 벤치 래퍼 */}

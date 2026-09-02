@@ -391,6 +391,109 @@ export default function PlayerDetail() {
           </div>
         </div>
 
+        {/* 🌟 선수 스탯 분석 & 육각형 레이더 차트 패널 */}
+        <div style={{
+          background: 'rgba(0, 0, 0, 0.2)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '20px',
+          padding: '1.8rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '2rem',
+          alignItems: 'center'
+        }}>
+          {/* 좌측: 스탯 프로그레스 바 목록 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              📊 공식 인게임 능력치
+            </h3>
+
+            {[
+              { label: '킥 (공격력)', val: Number(player.stats?.kick || player.stats?.kick_power || 80), max: 150, color: '#EF4444' },
+              { label: '가드 (수비력)', val: Number(player.stats?.guard || player.stats?.defense || 75), max: 150, color: '#10B981' },
+              { label: '컨트롤 (기교)', val: Number(player.stats?.control || player.stats?.technique || 85), max: 150, color: '#3B82F6' },
+              { label: '스피드 (민첩)', val: Number(player.stats?.speed || player.stats?.agility || 90), max: 150, color: '#F59E0B' },
+              { label: '체력 (지구력)', val: Number(player.stats?.stamina || player.stats?.guts || 80), max: 150, color: '#8B5CF6' }
+            ].map(stat => (
+              <div key={stat.label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.25rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{stat.label}</span>
+                  <span style={{ color: stat.color, fontWeight: 800 }}>{stat.val}</span>
+                </div>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min(100, Math.max(10, (stat.val / stat.max) * 100))}%`, 
+                    background: stat.color,
+                    borderRadius: '4px',
+                    transition: 'width 0.8s ease'
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 우측: 육각형 스탯 레이더 SVG 차트 */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '0.8rem' }}>
+              능력치 밸런스 레이더
+            </div>
+            <svg width="220" height="200" viewBox="0 0 220 200" style={{ overflow: 'visible' }}>
+              {/* 배경 눈금 3단계 */}
+              {[0.33, 0.66, 1].map((scale, i) => {
+                const r = 70 * scale;
+                const points = [0, 60, 120, 180, 240, 300].map(deg => {
+                  const rad = (deg - 90) * Math.PI / 180;
+                  return `${110 + r * Math.cos(rad)},${100 + r * Math.sin(rad)}`;
+                }).join(' ');
+                return <polygon key={i} points={points} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />;
+              })}
+
+              {/* 축 라인 6개 */}
+              {[0, 60, 120, 180, 240, 300].map((deg, i) => {
+                const rad = (deg - 90) * Math.PI / 180;
+                return <line key={i} x1="110" y1="100" x2={110 + 70 * Math.cos(rad)} y2={100 + 70 * Math.sin(rad)} stroke="rgba(255,255,255,0.12)" strokeWidth="1" />;
+              })}
+
+              {/* 선수 스탯 다각형 */}
+              {(() => {
+                const s = player.stats || {};
+                const vals = [
+                  Math.min(1, (Number(s.kick || s.kick_power || 80)) / 140),
+                  Math.min(1, (Number(s.control || s.technique || 85)) / 140),
+                  Math.min(1, (Number(s.speed || s.agility || 90)) / 140),
+                  Math.min(1, (Number(s.stamina || s.guts || 80)) / 140),
+                  Math.min(1, (Number(s.guard || s.defense || 75)) / 140),
+                  0.75 // TP
+                ];
+                const polyPoints = [0, 60, 120, 180, 240, 300].map((deg, i) => {
+                  const rad = (deg - 90) * Math.PI / 180;
+                  const r = Math.max(15, 70 * vals[i]);
+                  return `${110 + r * Math.cos(rad)},${100 + r * Math.sin(rad)}`;
+                }).join(' ');
+
+                return (
+                  <>
+                    <polygon points={polyPoints} fill="rgba(59, 130, 246, 0.35)" stroke="var(--primary-color)" strokeWidth="2.5" />
+                    {polyPoints.split(' ').map((p, i) => {
+                      const [cx, cy] = p.split(',');
+                      return <circle key={i} cx={cx} cy={cy} r="4" fill="var(--primary-color)" />;
+                    })}
+                  </>
+                );
+              })()}
+
+              {/* 축 라벨 텍스트 */}
+              <text x="110" y="18" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">킥</text>
+              <text x="195" y="60" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">컨트롤</text>
+              <text x="195" y="150" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">스피드</text>
+              <text x="110" y="192" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">체력</text>
+              <text x="25" y="150" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">가드</text>
+              <text x="25" y="60" fill="var(--text-main)" fontSize="10" fontWeight="800" textAnchor="middle">기력(TP)</text>
+            </svg>
+          </div>
+        </div>
+
         {/* 중간 구분선 */}
         <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.5rem 0' }} />
 

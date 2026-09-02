@@ -4,11 +4,13 @@
    글로벌 디자인 토큰 (테마 및 변수)
    ========================================== */
 :root {
-  /* 라이트 테마 변수 - 미니멀 플랫 테마 */
+  /* 라이트 테마 변수 */
   --primary-color: #2563EB;     /* 메인 브랜드 블루 */
-  --primary-glow: rgba(37, 99, 235, 0.08);
+  --primary-glow: rgba(37, 99, 235, 0.12);
   --secondary-color: #1D4ED8;   /* 호버 블루 */
   --accent-color: #D97706;      /* 활력 포인트 옐로우/엠버 */
+  --neon-green: #10B981;        /* 전술 에메랄드 네온 */
+  --neon-gold: #F59E0B;         /* 빅토리 골드 네온 */
   
   --bg-color: #F8FAFC;          /* 차분한 오프화이트 배경색 */
   --bg-surface: #FFFFFF;        /* 솔리드 카드 표면색 */
@@ -20,15 +22,14 @@
   --border-color: #E2E8F0;      
   --card-border: 1px solid #E2E8F0; 
   
-  /* 미니멀 SaaS 플랫 섀도우 체인 */
-  --soft-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --hover-shadow: 0 12px 20px -3px rgba(37, 99, 235, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   
-  --backdrop-blur: none;  
-  --transition-speed: 0.2s;
+  --backdrop-blur: blur(12px);  
+  --transition-speed: 0.25s;
 
-  /* 경기장 및 선수 카드 크기 제어용 반응형 변수 설계 (PC 기본 - 10% 확장 적용) */
+  /* 경기장 및 선수 카드 크기 제어용 반응형 변수 설계 */
   --field-max-width: 780px;
   --card-w: 92px;
   --card-h: 123px;
@@ -38,25 +39,27 @@
 }
 
 [data-theme="dark"] {
-  /* 다크 테마 변수 - 미니멀 SaaS 다크 테마 */
+  /* 다크 테마 변수 - Stitch Cyber-Tactical 테마 */
   --primary-color: #3B82F6;
-  --primary-glow: rgba(59, 130, 246, 0.15);
+  --primary-glow: rgba(59, 130, 246, 0.22);
   --secondary-color: #2563EB;
   --accent-color: #F59E0B;
+  --neon-green: #10B981;
+  --neon-gold: #FBBF24;
   
-  --bg-color: #090D16;          /* 깔끔하고 깊이있는 다크 그레이색 */
-  --bg-surface: #111827;        /* 솔리드 다크 카드 표면색 */
-  --bg-surface-pure: #1F2937;
+  --bg-color: #0B0F19;          /* 깊이있는 사이버 딥 차콜 */
+  --bg-surface: rgba(17, 24, 39, 0.85); /* 글래스모피즘 표면 */
+  --bg-surface-pure: #111827;
   
   --text-main: #F9FAFB;
   --text-muted: #9CA3AF;
   
-  --border-color: #1F2937;
-  --card-border: 1px solid #1F2937; 
+  --border-color: rgba(255, 255, 255, 0.08);
+  --card-border: 1px solid rgba(255, 255, 255, 0.08); 
   
-  --soft-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --soft-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --hover-shadow: 0 16px 32px rgba(59, 130, 246, 0.18), 0 0 15px rgba(16, 185, 129, 0.12);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 /* 다단계 반응형 뷰포트에 따른 동적 스케일 제어 (10% 확대 비례 연동) */
