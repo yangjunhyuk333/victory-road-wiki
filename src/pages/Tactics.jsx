@@ -1526,65 +1526,70 @@ export default function Tactics() {
 
                     </div>
 
-                    {/* 🌟 실시간 스쿼드 종합 전력 및 시너지 분석 HUD 패널 */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                        gap: '0.6rem',
-                        marginBottom: '0.8rem',
-                        padding: '0.75rem 1rem',
+                    {/* 🌟 실시간 스쿼드 종합 전력 및 시너지 분석 가로 HUD 바 */}
+                    <div className="tactics-stat-hud" style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        width: '100%',
+                        maxWidth: 'var(--field-max-width)',
+                        margin: '0 auto 0.85rem auto',
+                        padding: '0.65rem 1.25rem',
                         background: 'var(--bg-surface)',
                         border: '1px solid var(--border-color)',
-                        borderRadius: '14px',
-                        boxShadow: 'var(--soft-shadow)'
+                        borderRadius: '16px',
+                        boxShadow: 'var(--soft-shadow)',
+                        gap: '0.5rem',
+                        flexWrap: 'nowrap'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem', borderRight: '1px solid var(--border-color)', paddingRight: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <Award size={16} color="var(--primary-color)" />
                             </div>
-                            <div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>종합 전력</div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary-color)' }}>{squadStats.overallPower.toLocaleString()}</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>종합 전력</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--primary-color)', lineHeight: 1.1 }}>{squadStats.overallPower.toLocaleString()}</div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem', borderRight: '1px solid var(--border-color)', paddingRight: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <Crosshair size={16} color="#EF4444" />
                             </div>
-                            <div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 공격력(킥)</div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#EF4444' }}>{squadStats.totalKick.toLocaleString()}</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>총 공격력(킥)</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#EF4444', lineHeight: 1.1 }}>{squadStats.totalKick.toLocaleString()}</div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem', borderRight: '1px solid var(--border-color)', paddingRight: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <Shield size={16} color="#10B981" />
                             </div>
-                            <div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>총 수비력(가드)</div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#10B981' }}>{squadStats.totalGuard.toLocaleString()}</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>총 수비력(가드)</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#10B981', lineHeight: 1.1 }}>{squadStats.totalGuard.toLocaleString()}</div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem', borderRight: '1px solid var(--border-color)', paddingRight: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <Zap size={16} color="#F59E0B" />
                             </div>
-                            <div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>평균 스피드</div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#F59E0B' }}>{squadStats.avgSpeed}</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>평균 스피드</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#F59E0B', lineHeight: 1.1 }}>{squadStats.avgSpeed}</div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(168, 85, 247, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ flex: '1 1 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.55rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(168, 85, 247, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <Sparkles size={16} color="#A855F7" />
                             </div>
-                            <div>
-                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>스쿼드 완성도</div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#A855F7' }}>{squadStats.playerCount} / 11명</div>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>스쿼드 완성도</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#A855F7', lineHeight: 1.1 }}>{squadStats.playerCount} / 11명</div>
                             </div>
                         </div>
                     </div>
